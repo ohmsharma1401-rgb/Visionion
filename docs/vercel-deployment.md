@@ -1,0 +1,9 @@
+# Vercel deployment
+
+The `web/` directory has `vercel.json` for the Vite web application. Import `ohmsharma1401-rgb/Visionion` into Vercel with **web** as the project Root Directory. The build uses `npm ci`, `npm run build`, and publishes `dist`. From a terminal, run `vercel deploy --cwd web` at the repository root.
+
+The web app needs a separately hosted HTTPS OnionGrade API. Set `VITE_API_BASE_URL` in the Vercel project's Production and Preview environment variables to that API's origin, with no `/api` suffix or trailing slash, then redeploy. The frontend requests `${VITE_API_BASE_URL}/api/...`. Configure the backend's `CORS_ORIGINS` to include the exact Vercel deployment origin. Without an API URL, the page loads but inspection, sign-in, history, and reports are unavailable; the app displays an API-unavailable error rather than claiming analysis is working.
+
+The current Python API cannot be lifted unchanged into a Vercel Function. It uses PyTorch and OpenCV, writes images and report evidence to a local `data/` directory, and requires persistent PostgreSQL. Vercel Functions have a read-only filesystem apart from temporary scratch space and a Python bundle limit. A production API needs persistent object storage for original/annotated images and PDFs, a managed PostgreSQL database, fixed `JWT_SECRET` and `DEMO_PASSWORD`, migration execution, and validation of its publicly accessible HTTPS endpoint. The Docker configuration in this repository is the starting point for hosting that API on a container platform. Do not use the local SQLite prototype database for production.
+
+After both services are live, check `/api/health` on the API, load the Vercel site, sign in, capture an image, analyze a real labeled sample, and generate and verify a report. Camera access requires HTTPS or localhost; Vercel's HTTPS deployment supplies the secure browser context.

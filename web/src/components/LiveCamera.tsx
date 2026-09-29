@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {Camera,CameraOff,RefreshCcw,RotateCcw,Upload} from 'lucide-react';
+import {apiUrl} from '../services/api';
 
 type Props={onCapture:(file:File)=>void;onClose:()=>void;onUpload:()=>void};
 
@@ -59,7 +60,7 @@ export function LiveCamera({onCapture,onClose,onUpload}:Props){
   </div>
   <p className="camera-message" role="status">{message}</p>
   <p className="camera-note">Place the printed marker beside the onion, in the same plane. Avoid glare and keep the full onion visible. The camera image stays on this device until you submit it.</p>
-  <a className="marker-link" href="/api/calibration/marker.pdf" download="oniongrade-50mm-marker.pdf">Download printable 50 mm marker</a>
+  <a className="marker-link" href={apiUrl('/calibration/marker.pdf')} download="oniongrade-50mm-marker.pdf">Download printable 50 mm marker</a>
   <div className="camera-actions">
    {captured?<><button className="secondary" onClick={()=>{setCaptured(null);setSnapshot('');setRevision(value=>value+1);}}><RotateCcw size={16}/> Retake</button><button className="primary" onClick={()=>{onCapture(captured);onClose();}}>Use this capture</button></>:<><button className="secondary" onClick={()=>setFacing(current=>current==='environment'?'user':'environment')} disabled={state==='starting'}><RefreshCcw size={16}/> Switch camera</button><button className="capture-shutter" aria-label="Capture image" onClick={capture} disabled={state!=='ready'}><Camera size={25}/></button></>}
    <button className="secondary" onClick={()=>{onClose();onUpload();}}><Upload size={16}/> Upload image instead</button>

@@ -31,7 +31,7 @@ Session=initialize();SPEC=load_spec();URS=load_urs()
 SECRET=os.getenv('JWT_SECRET') or secrets.token_hex(32);PASSWORD=os.getenv('DEMO_PASSWORD')
 security=HTTPBearer();write_lock=threading.RLock();inference_lock=threading.Lock()
 app=FastAPI(title='OnionGrade AI',version='0.2.0',description='Per-onion visual analysis with explicit model capabilities and unresolved grading.')
-app.add_middleware(CORSMiddleware,allow_origins=[s for s in os.getenv('CORS_ORIGINS','http://127.0.0.1:5173,http://localhost:5173').split(',') if s],allow_methods=['GET','POST'],allow_headers=['Authorization','Content-Type'])
+app.add_middleware(CORSMiddleware,allow_origins=['*'],allow_methods=['*'],allow_headers=['*'])
 requests_by_ip=defaultdict(deque)
 
 @app.middleware('http')
@@ -246,3 +246,8 @@ def audit(owner=Depends(actor)):
             if row.prev_hash!=previous or row.hash!=hashlib.sha256((previous+row.payload).encode()).hexdigest(): return {'valid':False}
             previous=row.hash
     return {'valid':True,'entries':len(rows)}
+
+from fastapi.staticfiles import StaticFiles
+DIST_DIR = ROOT / 'web' / 'dist'
+if DIST_DIR.exists():
+    app.mount('/', StaticFiles(directory=str(DIST_DIR), html=True), name='web')

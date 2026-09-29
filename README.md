@@ -6,6 +6,8 @@ OnionGrade now runs a **real trained bulb-health model using the ZIP you supplie
 
 See [combined architecture and flowcharts](docs/combined-architecture.md), [model card](ml/MODEL_CARD.md), and [validation](docs/validation.md).
 
+For a Vercel web deployment, see [Vercel deployment](docs/vercel-deployment.md). The public site requires a separately hosted HTTPS API and PostgreSQL; a static frontend by itself cannot run the trained model or save reports.
+
 ## Start the existing workspace
 
 ```powershell

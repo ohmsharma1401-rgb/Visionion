@@ -20,5 +20,7 @@ if not os.getenv('DATABASE_URL') and not os.getenv('POSTGRES_HOST'):
     print('Local development database: SQLite in data/oniongrade.db')
 else:
     print('PostgreSQL:', migrate())
-print('Local demo: username inspector; password saved in data/local-demo-password.txt')
-uvicorn.run('backend.main:app',host='127.0.0.1',port=8000)
+host = os.getenv('HOST', '0.0.0.0')
+port = int(os.getenv('PORT', '8000'))
+print(f'Starting OnionGrade AI on http://{host}:{port}')
+uvicorn.run('backend.main:app', host=host, port=port)
