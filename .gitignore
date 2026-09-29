@@ -1,0 +1,15 @@
+node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+dist/
+data/
+.env
+tmp/
+.npm-cache/
+*.zip
+ml/datasets/raw/
+ml/datasets/prepared/
+ml/models/*.pt
+ml/models/*.onnx
+ml/cache/

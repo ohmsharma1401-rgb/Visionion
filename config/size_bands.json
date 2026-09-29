@@ -1,0 +1,11 @@
+{
+  "version": "SIZE-DEMO-v1",
+  "official": false,
+  "reference_width_mm": 50,
+  "bands": [
+    {"name": "Small", "min_mm": 0, "max_mm": 45},
+    {"name": "Medium", "min_mm": 45, "max_mm": 55},
+    {"name": "Large", "min_mm": 55, "max_mm": 65},
+    {"name": "Extra Large", "min_mm": 65, "max_mm": null}
+  ]
+}

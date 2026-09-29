@@ -1,0 +1,28 @@
+datasets:
+  supplied_red_white_onion:
+    archive: "Image Dataset of Red and White Onion Bulbs and Lea.zip"
+    status: inspected_and_used
+    total_images: 16300
+    annotation_type: folder_classification
+    label_mapping:
+      "Bulb/Healthy": HEALTHY_BULB
+      "Bulb/Unhealthy": UNHEALTHY_BULB
+      "Leaves/*": LEAF_ONLY
+    ambiguous_defect_subtypes: REVIEW_REQUIRED
+    instance_annotations: absent
+    lot_ids: absent
+  bad_onion:
+    status: not_supplied_or_inspected
+    label_mapping: {}
+  onion_classification_segmentation:
+    status: not_supplied_or_inspected
+    label_mapping: {}
+  roboflow_onion_quality:
+    status: not_supplied_or_inspected
+    label_mapping: {}
+  onionguard_tom2024:
+    status: not_supplied_or_inspected
+    label_mapping: {}
+  cargo_inspection_reference:
+    status: reference_project_not_supplied
+    label_mapping: {}

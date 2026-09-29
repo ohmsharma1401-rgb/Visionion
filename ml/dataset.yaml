@@ -1,0 +1,11 @@
+# Replace with a licensed, annotated dataset. Split by lot, never random images.
+path: ./datasets/onions
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: Good
+  1: Damaged
+  2: Rotten
+  3: Sprouted
+  4: Undersized

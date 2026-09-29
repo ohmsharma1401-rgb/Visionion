@@ -1,0 +1,494 @@
+[
+  {
+    "source_label": "HEALTHY_BULB",
+    "status": 200,
+    "result": {
+      "id": "2ad1107e-b06d-4b9a-8cec-ea55be259771",
+      "success": true,
+      "mode": "health",
+      "model_version": "bulb-health-v1",
+      "grading_spec": "ONION-VISUAL-DEMO-v2",
+      "image_quality": {
+        "usable": true,
+        "blur_score": 214.66,
+        "brightness": 114.37,
+        "glare_fraction": 0.0393,
+        "width": 256,
+        "height": 256,
+        "reasons": [],
+        "sha256": "7dfecae2ee83d344c688f1d1bc3464367189f3114314412e57f968b6b301cfa8"
+      },
+      "summary": {
+        "total_onions": 1,
+        "valid_onions": 0,
+        "grade_a_count": 0,
+        "counts": {
+          "GOOD": 1,
+          "DAMAGED": 0,
+          "ROTTEN": 0,
+          "SPROUTED": 0,
+          "UNDERSIZED": 0,
+          "REVIEW_REQUIRED": 0
+        },
+        "good_count": 1,
+        "damaged_count": 0,
+        "rotten_count": 0,
+        "sprouted_count": 0,
+        "undersized_count": 0,
+        "review_count": 1,
+        "grade_a_percentage": null,
+        "urs_percentage": null,
+        "urs_message": "URS calculation requires the configured official grading specification.",
+        "quality_score": null,
+        "quality_score_label": "AI Visual Quality Score",
+        "score_explanation": {
+          "base": 100,
+          "weights": {
+            "GOOD": 0.0,
+            "DAMAGED": 15.0,
+            "ROTTEN": 30.0,
+            "SPROUTED": 20.0,
+            "UNDERSIZED": 10.0
+          },
+          "deductions": {
+            "GOOD": 0.0,
+            "DAMAGED": 0.0,
+            "ROTTEN": 0.0,
+            "SPROUTED": 0.0,
+            "UNDERSIZED": 0.0
+          },
+          "denominator": 1,
+          "formula": "100 \u2212 sum(class count \u00d7 configured penalty) / visually resolved onion count. Not an official grade."
+        },
+        "denominator_policy": "0 resolved Grade A decisions / 1 detections. 1 unresolved decisions excluded; percentage is partial when review is pending.",
+        "review_required": true,
+        "status": "REVIEW_REQUIRED",
+        "average_diameter": null,
+        "min_diameter": null,
+        "max_diameter": null,
+        "defect_distribution": {},
+        "confidence_statistics": {
+          "mean": 0.9993,
+          "min": 0.9993082284927368,
+          "max": 0.9993082284927368
+        }
+      },
+      "grade_a_percentage": null,
+      "urs_percentage": null,
+      "quality_score": null,
+      "review_required": true,
+      "detections": [
+        {
+          "id": 1,
+          "class": "GOOD",
+          "confidence": 0.9993082284927368,
+          "bbox": [
+            0.0,
+            0.0,
+            256.0,
+            256.0
+          ],
+          "mask": null,
+          "centroid": [
+            128.0,
+            128.0
+          ],
+          "diameter_mm": null,
+          "defects": [],
+          "grade_a_candidate": null,
+          "review_required": true,
+          "reasons": [
+            "This model predicts broad bulb health only. Specific defect checks needed for Grade A were not trained; manual review is required."
+          ],
+          "region_source": "user_confirmed_single_image",
+          "visibility_issues": [],
+          "health_label": "HEALTHY_BULB",
+          "health_probabilities": {
+            "HEALTHY_BULB": 0.9993082284927368,
+            "UNHEALTHY_BULB": 0.00066993641667068,
+            "LEAF_ONLY": 2.179769944632426e-05
+          },
+          "eligibility_blocked": "This model predicts broad bulb health only. Specific defect checks needed for Grade A were not trained; manual review is required.",
+          "classification_uncertain": false
+        }
+      ],
+      "schema_version": 2,
+      "created_at": "2026-09-29T09:46:22.725274+00:00",
+      "inspector": "inspector",
+      "variety": "Unspecified",
+      "demo": false,
+      "spec_snapshot": {
+        "spec_version": "ONION-VISUAL-DEMO-v2",
+        "official": false,
+        "variant": "Fresh onion - illustrative rules, not government approved",
+        "size_range_mm": {
+          "min": 45.0,
+          "max": 65.0
+        },
+        "review_confidence": 0.5,
+        "defect_rules": {
+          "CUT_CRACK": "NOT_ALLOWED",
+          "SPROUTED": "NOT_ALLOWED",
+          "MECHANICAL_INJURY": "NOT_ALLOWED",
+          "ROTTING": "NOT_ALLOWED",
+          "FUNGAL_INFECTION": "NOT_ALLOWED"
+        },
+        "tolerances": {
+          "DISCOLORATION_SURFACE_PERCENT": 30.0,
+          "SMUT_SURFACE_PERCENT": 10.0
+        },
+        "quality_weights": {
+          "GOOD": 0.0,
+          "DAMAGED": 15.0,
+          "ROTTEN": 30.0,
+          "SPROUTED": 20.0,
+          "UNDERSIZED": 10.0
+        },
+        "denominator_policy": "resolved_only",
+        "quality": {
+          "min_dimension": 128.0,
+          "max_pixels": 24000000.0,
+          "min_laplacian_variance": 35.0,
+          "min_brightness": 40.0,
+          "max_brightness": 225.0,
+          "max_glare_fraction": 0.25,
+          "max_overlap_iou": 0.45,
+          "max_occluded_fraction": 0.4
+        }
+      },
+      "urs_snapshot": {
+        "version": "urs-unconfigured-v1",
+        "enabled": false,
+        "authoritative_source": null,
+        "classes": [],
+        "message": "URS calculation requires the configured official grading specification."
+      },
+      "calibration": {
+        "available": false,
+        "mm_per_pixel": null,
+        "reference_mm": null,
+        "points": null,
+        "method": "unavailable",
+        "message": "Physical size cannot be reliably estimated without a reference scale."
+      },
+      "width": 256,
+      "height": 256,
+      "image_url": "/api/inspection/2ad1107e-b06d-4b9a-8cec-ea55be259771/image",
+      "annotated_url": "/api/inspection/2ad1107e-b06d-4b9a-8cec-ea55be259771/annotated",
+      "total_onions": 1,
+      "valid_onions": 0,
+      "grade_a_count": 0,
+      "counts": {
+        "GOOD": 1,
+        "DAMAGED": 0,
+        "ROTTEN": 0,
+        "SPROUTED": 0,
+        "UNDERSIZED": 0,
+        "REVIEW_REQUIRED": 0
+      },
+      "good_count": 1,
+      "damaged_count": 0,
+      "rotten_count": 0,
+      "sprouted_count": 0,
+      "undersized_count": 0,
+      "review_count": 1,
+      "urs_message": "URS calculation requires the configured official grading specification.",
+      "quality_score_label": "AI Visual Quality Score",
+      "score_explanation": {
+        "base": 100,
+        "weights": {
+          "GOOD": 0.0,
+          "DAMAGED": 15.0,
+          "ROTTEN": 30.0,
+          "SPROUTED": 20.0,
+          "UNDERSIZED": 10.0
+        },
+        "deductions": {
+          "GOOD": 0.0,
+          "DAMAGED": 0.0,
+          "ROTTEN": 0.0,
+          "SPROUTED": 0.0,
+          "UNDERSIZED": 0.0
+        },
+        "denominator": 1,
+        "formula": "100 \u2212 sum(class count \u00d7 configured penalty) / visually resolved onion count. Not an official grade."
+      },
+      "denominator_policy": "0 resolved Grade A decisions / 1 detections. 1 unresolved decisions excluded; percentage is partial when review is pending.",
+      "status": "REVIEW_REQUIRED",
+      "average_diameter": null,
+      "min_diameter": null,
+      "max_diameter": null,
+      "defect_distribution": {},
+      "confidence_statistics": {
+        "mean": 0.9993,
+        "min": 0.9993082284927368,
+        "max": 0.9993082284927368
+      },
+      "limitations": [
+        "AI detects visible characteristics only. Internal rot, pesticide residue, moisture, firmness, smell, microbial infection and hidden defects cannot be reliably determined from these images.",
+        "Physical size needs a reference in the same plane; overlapping or partially hidden onions cannot be measured reliably.",
+        "The health model was trained on broad image-level labels. It cannot identify rot/damage/sprouting subtypes or certify Grade A. User outlines are not learned segmentation."
+      ],
+      "model_sha256": "96d5dddd3d721b4fe3513f3c1bbe8c5c94707b03bdef4717df5e6184fdb89bbe",
+      "report_hash": "0b88928b0071028997bf6eb5e1c30d25220439976bfdf7638be7c1d94889f2ac"
+    }
+  },
+  {
+    "source_label": "UNHEALTHY_BULB",
+    "status": 200,
+    "result": {
+      "id": "694355cf-8569-4995-b74e-de28a3366ff8",
+      "success": true,
+      "mode": "health",
+      "model_version": "bulb-health-v1",
+      "grading_spec": "ONION-VISUAL-DEMO-v2",
+      "image_quality": {
+        "usable": true,
+        "blur_score": 111.58,
+        "brightness": 128.38,
+        "glare_fraction": 0.0051,
+        "width": 256,
+        "height": 256,
+        "reasons": [],
+        "sha256": "89209a2084dfafbf64f0c205f7555f4d14c120e64b138ad05d24aaba1761281b"
+      },
+      "summary": {
+        "total_onions": 1,
+        "valid_onions": 0,
+        "grade_a_count": 0,
+        "counts": {
+          "GOOD": 0,
+          "DAMAGED": 0,
+          "ROTTEN": 0,
+          "SPROUTED": 0,
+          "UNDERSIZED": 0,
+          "REVIEW_REQUIRED": 1
+        },
+        "good_count": 0,
+        "damaged_count": 0,
+        "rotten_count": 0,
+        "sprouted_count": 0,
+        "undersized_count": 0,
+        "review_count": 1,
+        "grade_a_percentage": null,
+        "urs_percentage": null,
+        "urs_message": "URS calculation requires the configured official grading specification.",
+        "quality_score": null,
+        "quality_score_label": "AI Visual Quality Score",
+        "score_explanation": {
+          "base": 100,
+          "weights": {
+            "GOOD": 0.0,
+            "DAMAGED": 15.0,
+            "ROTTEN": 30.0,
+            "SPROUTED": 20.0,
+            "UNDERSIZED": 10.0
+          },
+          "deductions": {
+            "GOOD": 0,
+            "DAMAGED": 0,
+            "ROTTEN": 0,
+            "SPROUTED": 0,
+            "UNDERSIZED": 0
+          },
+          "denominator": 0,
+          "formula": "100 \u2212 sum(class count \u00d7 configured penalty) / visually resolved onion count. Not an official grade."
+        },
+        "denominator_policy": "0 resolved Grade A decisions / 1 detections. 1 unresolved decisions excluded; percentage is partial when review is pending.",
+        "review_required": true,
+        "status": "REVIEW_REQUIRED",
+        "average_diameter": null,
+        "min_diameter": null,
+        "max_diameter": null,
+        "defect_distribution": {
+          "UNSPECIFIED_VISIBLE_UNHEALTHY": 1
+        },
+        "confidence_statistics": {
+          "mean": 0.9998,
+          "min": 0.9997784495353699,
+          "max": 0.9997784495353699
+        }
+      },
+      "grade_a_percentage": null,
+      "urs_percentage": null,
+      "quality_score": null,
+      "review_required": true,
+      "detections": [
+        {
+          "id": 1,
+          "class": "REVIEW_REQUIRED",
+          "confidence": 0.9997784495353699,
+          "bbox": [
+            0.0,
+            0.0,
+            256.0,
+            256.0
+          ],
+          "mask": null,
+          "centroid": [
+            128.0,
+            128.0
+          ],
+          "diameter_mm": null,
+          "defects": [
+            {
+              "type": "UNSPECIFIED_VISIBLE_UNHEALTHY",
+              "confidence": 0.9997784495353699,
+              "surface_percent": null
+            }
+          ],
+          "grade_a_candidate": null,
+          "review_required": true,
+          "reasons": [
+            "AI is uncertain about this onion; exclude it from the resolved grading denominator.",
+            "UNSPECIFIED_VISIBLE_UNHEALTHY: no configured rule; manual review required."
+          ],
+          "region_source": "user_confirmed_single_image",
+          "visibility_issues": [],
+          "health_label": "UNHEALTHY_BULB",
+          "health_probabilities": {
+            "HEALTHY_BULB": 0.00015808679745532572,
+            "UNHEALTHY_BULB": 0.9997784495353699,
+            "LEAF_ONLY": 6.34871976217255e-05
+          },
+          "eligibility_blocked": "This model predicts broad bulb health only. Specific defect checks needed for Grade A were not trained; manual review is required.",
+          "classification_uncertain": true
+        }
+      ],
+      "schema_version": 2,
+      "created_at": "2026-09-29T09:46:22.994356+00:00",
+      "inspector": "inspector",
+      "variety": "Unspecified",
+      "demo": false,
+      "spec_snapshot": {
+        "spec_version": "ONION-VISUAL-DEMO-v2",
+        "official": false,
+        "variant": "Fresh onion - illustrative rules, not government approved",
+        "size_range_mm": {
+          "min": 45.0,
+          "max": 65.0
+        },
+        "review_confidence": 0.5,
+        "defect_rules": {
+          "CUT_CRACK": "NOT_ALLOWED",
+          "SPROUTED": "NOT_ALLOWED",
+          "MECHANICAL_INJURY": "NOT_ALLOWED",
+          "ROTTING": "NOT_ALLOWED",
+          "FUNGAL_INFECTION": "NOT_ALLOWED"
+        },
+        "tolerances": {
+          "DISCOLORATION_SURFACE_PERCENT": 30.0,
+          "SMUT_SURFACE_PERCENT": 10.0
+        },
+        "quality_weights": {
+          "GOOD": 0.0,
+          "DAMAGED": 15.0,
+          "ROTTEN": 30.0,
+          "SPROUTED": 20.0,
+          "UNDERSIZED": 10.0
+        },
+        "denominator_policy": "resolved_only",
+        "quality": {
+          "min_dimension": 128.0,
+          "max_pixels": 24000000.0,
+          "min_laplacian_variance": 35.0,
+          "min_brightness": 40.0,
+          "max_brightness": 225.0,
+          "max_glare_fraction": 0.25,
+          "max_overlap_iou": 0.45,
+          "max_occluded_fraction": 0.4
+        }
+      },
+      "urs_snapshot": {
+        "version": "urs-unconfigured-v1",
+        "enabled": false,
+        "authoritative_source": null,
+        "classes": [],
+        "message": "URS calculation requires the configured official grading specification."
+      },
+      "calibration": {
+        "available": false,
+        "mm_per_pixel": null,
+        "reference_mm": null,
+        "points": null,
+        "method": "unavailable",
+        "message": "Physical size cannot be reliably estimated without a reference scale."
+      },
+      "width": 256,
+      "height": 256,
+      "image_url": "/api/inspection/694355cf-8569-4995-b74e-de28a3366ff8/image",
+      "annotated_url": "/api/inspection/694355cf-8569-4995-b74e-de28a3366ff8/annotated",
+      "total_onions": 1,
+      "valid_onions": 0,
+      "grade_a_count": 0,
+      "counts": {
+        "GOOD": 0,
+        "DAMAGED": 0,
+        "ROTTEN": 0,
+        "SPROUTED": 0,
+        "UNDERSIZED": 0,
+        "REVIEW_REQUIRED": 1
+      },
+      "good_count": 0,
+      "damaged_count": 0,
+      "rotten_count": 0,
+      "sprouted_count": 0,
+      "undersized_count": 0,
+      "review_count": 1,
+      "urs_message": "URS calculation requires the configured official grading specification.",
+      "quality_score_label": "AI Visual Quality Score",
+      "score_explanation": {
+        "base": 100,
+        "weights": {
+          "GOOD": 0.0,
+          "DAMAGED": 15.0,
+          "ROTTEN": 30.0,
+          "SPROUTED": 20.0,
+          "UNDERSIZED": 10.0
+        },
+        "deductions": {
+          "GOOD": 0,
+          "DAMAGED": 0,
+          "ROTTEN": 0,
+          "SPROUTED": 0,
+          "UNDERSIZED": 0
+        },
+        "denominator": 0,
+        "formula": "100 \u2212 sum(class count \u00d7 configured penalty) / visually resolved onion count. Not an official grade."
+      },
+      "denominator_policy": "0 resolved Grade A decisions / 1 detections. 1 unresolved decisions excluded; percentage is partial when review is pending.",
+      "status": "REVIEW_REQUIRED",
+      "average_diameter": null,
+      "min_diameter": null,
+      "max_diameter": null,
+      "defect_distribution": {
+        "UNSPECIFIED_VISIBLE_UNHEALTHY": 1
+      },
+      "confidence_statistics": {
+        "mean": 0.9998,
+        "min": 0.9997784495353699,
+        "max": 0.9997784495353699
+      },
+      "limitations": [
+        "AI detects visible characteristics only. Internal rot, pesticide residue, moisture, firmness, smell, microbial infection and hidden defects cannot be reliably determined from these images.",
+        "Physical size needs a reference in the same plane; overlapping or partially hidden onions cannot be measured reliably.",
+        "The health model was trained on broad image-level labels. It cannot identify rot/damage/sprouting subtypes or certify Grade A. User outlines are not learned segmentation."
+      ],
+      "model_sha256": "96d5dddd3d721b4fe3513f3c1bbe8c5c94707b03bdef4717df5e6184fdb89bbe",
+      "report_hash": "077a17f60183dcb42609697b98f2e9e84779be8f7fdbbbc948266c2670a8b862"
+    }
+  },
+  {
+    "source_label": "LEAF_ONLY",
+    "status": 422,
+    "result": {
+      "detail": {
+        "message": "Image quality is insufficient for reliable analysis.",
+        "reasons": [
+          "No onion detected, or the health model identified a leaf-only image."
+        ],
+        "demo": false
+      }
+    }
+  }
+]

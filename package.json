@@ -1,0 +1,1 @@
+{"name":"oniongrade-ai","private":true,"scripts":{"dev":"npm --prefix web run dev","build":"npm --prefix web run build","test":".venv/Scripts/python.exe -m pytest backend/tests backend/grading/tests -q"}}

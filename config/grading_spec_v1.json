@@ -1,0 +1,12 @@
+{
+  "spec_version": "ONION-VISUAL-DEMO-v2",
+  "official": false,
+  "variant": "Fresh onion - illustrative rules, not government approved",
+  "size_range_mm": {"min": 45, "max": 65},
+  "review_confidence": 0.5,
+  "denominator_policy": "resolved_only",
+  "defect_rules": {"CUT_CRACK": "NOT_ALLOWED", "SPROUTED": "NOT_ALLOWED", "MECHANICAL_INJURY": "NOT_ALLOWED", "ROTTING": "NOT_ALLOWED", "FUNGAL_INFECTION": "NOT_ALLOWED"},
+  "tolerances": {"DISCOLORATION_SURFACE_PERCENT": 30, "SMUT_SURFACE_PERCENT": 10},
+  "quality_weights": {"GOOD": 0, "DAMAGED": 15, "ROTTEN": 30, "SPROUTED": 20, "UNDERSIZED": 10},
+  "quality": {"min_dimension": 128, "max_pixels": 24000000, "min_laplacian_variance": 35, "min_brightness": 40, "max_brightness": 225, "max_glare_fraction": 0.25, "max_overlap_iou": 0.45, "max_occluded_fraction": 0.4}
+}

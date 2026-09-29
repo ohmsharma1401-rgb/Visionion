@@ -1,0 +1,13 @@
+.venv
+web/node_modules
+web/dist
+.npm-cache
+.git
+*.zip
+ml/datasets/raw
+ml/datasets/prepared
+ml/cache
+output
+data
+__pycache__
+.env

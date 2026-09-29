@@ -1,0 +1,34 @@
+{
+  "model_version": "bulb-health-all-v2",
+  "architecture": "mobilenet_v3_small",
+  "parent_model_version": "bulb-health-v1",
+  "parent_sha256": "96d5dddd3d721b4fe3513f3c1bbe8c5c94707b03bdef4717df5e6184fdb89bbe",
+  "training_images": 16271,
+  "class_counts": {
+    "LEAF_ONLY": 4038,
+    "HEALTHY_BULB": 8219,
+    "UNHEALTHY_BULB": 4014
+  },
+  "source_splits_used": {
+    "train": 8177,
+    "test": 2137,
+    "val": 1726,
+    "multiple_stress": 4231
+  },
+  "epochs": 6,
+  "device": "cuda",
+  "elapsed_seconds": 468.4,
+  "confidence_threshold": 0.65,
+  "threshold_provenance": "Inherited from v1 validation; not recalibrated after all-image training.",
+  "evaluation_status": "No independent holdout remains for this all-image checkpoint. The v1 held-out metrics do not measure v2 performance.",
+  "limitations": [
+    "No true lot/session identifiers; consecutive filename proxy groups do not establish lot independence.",
+    "Single-bulb labels support broad health only, not defect subtypes or Grade A.",
+    "No bounding boxes or masks in supplied dataset. Multiple stress results are image-level only.",
+    "Leaf class is not a general non-onion detector. Unseen objects can be misclassified.",
+    "Softmax confidence is not a calibrated probability of correctness.",
+    "Multi-bulb images were used with image-level health labels; this does not train per-onion detection or segmentation.",
+    "A new independent lot-level test is required to estimate deployment accuracy."
+  ],
+  "sha256": "1fd4ea7f18c0a41625dd52dbaae16107f37c89483422a62c4b86c945c222bb4d"
+}

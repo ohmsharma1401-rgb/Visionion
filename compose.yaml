@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: oniongrade
+      POSTGRES_USER: oniongrade
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oniongrade -d oniongrade"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  backend:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    environment:
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: oniongrade
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: oniongrade
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - inspection-data:/app/data
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - backend
+volumes:
+  inspection-data:
+  postgres-data:

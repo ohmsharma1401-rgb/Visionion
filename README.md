@@ -1,0 +1,92 @@
+# OnionGrade AI
+
+OnionGrade now runs a **real trained bulb-health model using the ZIP you supplied**. The responsive React app supports image upload/camera, per-onion user outlines, reference calibration, explainable grading decisions, history, JSON export, and PDF reports with original/annotated images and hash/QR verification.
+
+**Supported real labels:** healthy bulb, unhealthy bulb and leaf only. The dataset has no instance masks, boxes, measured sizes or defect subtypes. Automatic onion segmentation and separate rotten/damaged/sprouted predictions therefore remain untrained. The app does not invent these capabilities: individual real bulbs are user-confirmed or user-outlined, health-only Grade A remains unresolved, and URS is disabled pending an official definition. An explicitly selected **DEMO ANALYSIS** mode exercises the multi-class segmentation/grading flow with mock geometry and findings.
+
+See [combined architecture and flowcharts](docs/combined-architecture.md), [model card](ml/MODEL_CARD.md), and [validation](docs/validation.md).
+
+## Start the existing workspace
+
+```powershell
+.\.venv\Scripts\python.exe scripts/run_local.py
+```
+
+In another terminal:
+
+```powershell
+npm.cmd run dev
+```
+
+Open `http://127.0.0.1:5173`. Username: **inspector**. The generated password is in ignored `data/local-demo-password.txt`. The local API binds only to 127.0.0.1. Set `DATABASE_URL` to a PostgreSQL URL (for example `postgresql+psycopg://oniongrade:password@127.0.0.1:5432/oniongrade`) or set `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` before running the launcher. It applies Alembic migrations and copies the previous SQLite records once after verifying their hashes. Protect `data/` like any local credential and evidence store.
+
+## Fresh installation
+
+Use Python 3.12 and Node 22+:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+.\.venv\Scripts\python.exe -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
+npm.cmd ci --prefix web
+```
+
+For CPU-only inference use the official PyTorch CPU wheel index instead. The GPU wheel pair used here is documented in [PyTorch's version matrix](https://docs.pytorch.org/get-started/previous-versions/). On macOS/Linux use `.venv/bin/python` and a platform-appropriate PyTorch build.
+
+The evaluated weights are `ml/models/bulb-health-v1.pt` (6.21 MB), with metrics and hash in `ml/models/bulb-health-v1.json`. Large data and binary weights are ignored by Git; retain/copy the evaluated checkpoint when moving the project. `bulb-health-v1.torchscript.pt` is also available; this is not TFLite or an integrated mobile runtime.
+
+## Real-image flow
+
+1. Select **Trained bulb-health model**, upload a clear photo or use **Camera**.
+2. For one bulb, confirm it is a single-bulb image. For several bulbs, choose **Outline onion**, click around each visible bulb, and **Finish outline** for each. Outlines are user-provided evidence, not model-generated segmentation.
+3. For physical measurement, choose **Reference scale**, click both endpoints of a known-size reference in the same plane, and enter its length in millimetres. A valid onion outline is also required. Whole-image confirmation alone cannot measure a bulb.
+4. Sign in and analyze. Select a boundary to see health evidence, confidence, physical size where supported, uncertainty and the grading explanation.
+5. Generate a PDF or export JSON. History contains only saved v2 analyses; old v1 snapshots remain in the database but are hidden because their grading semantics differ.
+
+The health model cannot certify Grade A or calculate the weighted defect quality score. Its healthy prediction does not prove the absence of a specific defect. Unhealthy stays unspecified rather than being relabeled as rot. In demo mode mock findings exercise these rules but are not evidence about the uploaded image.
+
+## Training and dataset preparation
+
+The user supplied `Image Dataset of Red and White Onion Bulbs and Lea.zip`, containing another ZIP. The nested archive was inspected and saved to ignored `ml/datasets/raw/onion-source.zip`. It contains 16,300 images, including bulbs and leaves, with classification folders only. No content was uploaded to an external service.
+
+```powershell
+.\.venv\Scripts\python.exe ml/datasets/prepare_dataset.py
+.\.venv\Scripts\python.exe ml/datasets/validate_dataset.py
+.\.venv\Scripts\python.exe ml/training/train_health.py --epochs 12 --workers 2
+.\.venv\Scripts\python.exe ml/training/export_health.py
+```
+
+Preparation removes exact duplicates and conflicting hash labels, decodes every image, and preserves source labels. Multiple-bulb pictures are held out as an image-level stress test. There are no lot IDs: 100-consecutive-file groups provide an explicit proxy split, not proof of independent lots. Mild augmentation applies only to training.
+
+Actual run: 8,177 training, 1,726 validation, 2,137 test and 4,231 multiple-bulb stress images. Early stopping completed ten epochs and selected epoch six. Held-out accuracy **99.77%**, macro F1 **0.9970**; multiple-bulb image-level accuracy **86.79%**. Treat these as provisional dataset metrics, not deployment accuracy. See the full model card for confounders and unsupported claims.
+
+YOLO segmentation scaffolding remains in `ml/train.py`, `ml/evaluate.py`, `ml/export.py`, and `ml/dataset.yaml`. It is a separate workflow requiring proper instance annotations; it was not trained using invented masks from this ZIP. `ONION_SEG_WEIGHTS` can enable the optional real segmentation adapter after compatible onion weights and label semantics are validated.
+
+## API
+
+- `POST /api/auth/login`
+- `POST /api/analyze`: multipart `image`, `mode`, optional `regions` polygons, `calibration_reference_mm`, `calibration_points`, `variety`; health mode requires regions or `single_onion_confirmed=true`.
+- `POST /api/analyze/batch`: 1–10 independent images; real health mode requires confirmation of one bulb per image. No repeated-onion cross-image deduplication is claimed.
+- `GET /api/inspection/{id}`, `/image`, `/annotated`
+- `GET /api/inspections`
+- `POST /api/report/{id}`, `GET /api/report/{id}/pdf`
+- `GET /api/reports/verify/{hash}`
+- `GET /api/model/info`, `/api/grading-spec`, `/api/health`, `/api/audit/verify`
+
+OpenAPI is available at `http://127.0.0.1:8000/docs`. Analysis records are immutable. JPEG evidence is re-encoded without EXIF. A canonical analysis hash is embedded in the PDF; the separate PDF byte hash is stored and verified independently. A single document cannot contain its own conventional SHA-256 without a self-reference problem. Hashes are not digital signatures; the local database is not an externally anchored immutable ledger.
+
+## Tests
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest backend/tests backend/grading/tests -q
+npm.cmd run build
+.\.venv\Scripts\python.exe scripts/verify_real_model.py
+```
+
+The browser check is `scripts/browser-check.cjs` with Playwright and installed Edge; set `PLAYWRIGHT_MODULE` to its module path if using the bundled runtime. `scripts/summarize_training.py` generates an evaluation figure with Matplotlib (optional plotting dependency).
+
+## Deployment and remaining work
+
+Docker Compose builds the CPU inference environment, starts a persistent PostgreSQL service, waits for it to become healthy, applies Alembic migrations, then starts the API. Keep the evaluated weights in `ml/models` before building. Copy `.env.example` to `.env`, replace the demo, JWT and PostgreSQL passwords, then run `docker compose up --build`. Docker has not been executed here. Keep one API worker: local locks and rate counters are not distributed. Docker's database volume is independent of the local launcher database; it does not automatically contain the migrated local history. Its PostgreSQL server is exposed only on `127.0.0.1:5433`; to migrate the previous SQLite records, set `POSTGRES_HOST=127.0.0.1`, `POSTGRES_PORT=5433`, `POSTGRES_USER=oniongrade`, `POSTGRES_DB=oniongrade` and `POSTGRES_PASSWORD` from `.env`, then run `scripts/migrate_sqlite_to_postgres.py` from the host.
+
+The current PostgreSQL snapshot schema is documented in `docs/schema.sql`; Alembic owns changes to the deployed schema. Additional production work includes expert instance annotations, independent-lot evaluation, calibrated size validation, reviewer corrections, full RBAC, TLS, stronger identity/rate controls, external audit anchoring, encrypted storage, multilingual UI/reports and on-device inference. PWA shell caching is not offline inference or automatic sync.
