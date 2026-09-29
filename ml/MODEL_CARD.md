@@ -1,4 +1,14 @@
-# Model card — bulb-health-v1
+# Model card — bulb-health-all-v2 and bulb-health-v1
+
+## Active all-image checkpoint
+
+`bulb-health-all-v2` is the active local API checkpoint. It fine-tuned v1 for six additional GPU epochs on **all 16,271 unique usable images** from the supplied archive: 8,219 healthy bulbs, 4,014 unhealthy bulbs and 4,038 leaf-only images. This includes the former 8,177 training, 1,726 validation, 2,137 test and 4,231 multi-bulb stress images. The 4,231 multi-bulb images carry only image-level labels; this training does not teach instance detection or per-onion segmentation.
+
+The active checkpoint is `ml/models/bulb-health-all-v2.pt`, SHA-256 `1fd4ea7f18c0a41625dd52dbaae16107f37c89483422a62c4b86c945c222bb4d`. Metadata and training history are in `ml/models/bulb-health-all-v2.json` and `ml/models/all-images-training-history.json`. The 0.65 review threshold was inherited from v1 and was not recalibrated after all-image training. **No independent holdout remains for v2.** A new, separately collected and labeled lot-level evaluation is required before estimating its deployment accuracy. The v1 metrics below describe v1 only.
+
+Reproduce v2 after preparing the dataset and creating v1 using `python ml/training/train_all_health.py`. The script verifies source images and checkpoint hashes before training.
+
+## Earlier evaluated checkpoint
 
 **Status:** trained and integrated in the local app on 2026-09-29. This replaces the earlier fixed-demo-only runtime for supported broad bulb-health predictions.
 

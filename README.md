@@ -18,7 +18,7 @@ In another terminal:
 npm.cmd run dev
 ```
 
-Open `http://127.0.0.1:5173`. Username: **inspector**. The generated password is in ignored `data/local-demo-password.txt`. The local API binds only to 127.0.0.1. Set `DATABASE_URL` to a PostgreSQL URL (for example `postgresql+psycopg://oniongrade:password@127.0.0.1:5432/oniongrade`) or set `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` before running the launcher. It applies Alembic migrations and copies the previous SQLite records once after verifying their hashes. Protect `data/` like any local credential and evidence store.
+Open `http://127.0.0.1:5173`. Username: **inspector**. The generated password is in ignored `data/local-demo-password.txt`. The local API binds only to 127.0.0.1 and uses SQLite for this local prototype unless PostgreSQL is configured. Set `DATABASE_URL` to a PostgreSQL URL (for example `postgresql+psycopg://oniongrade:password@127.0.0.1:5432/oniongrade`) or set `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` before running the launcher to use PostgreSQL. It applies Alembic migrations and copies previous SQLite records once after verifying their hashes. Protect `data/` like any local credential and evidence store.
 
 ## Fresh installation
 
@@ -33,13 +33,13 @@ npm.cmd ci --prefix web
 
 For CPU-only inference use the official PyTorch CPU wheel index instead. The GPU wheel pair used here is documented in [PyTorch's version matrix](https://docs.pytorch.org/get-started/previous-versions/). On macOS/Linux use `.venv/bin/python` and a platform-appropriate PyTorch build.
 
-The evaluated weights are `ml/models/bulb-health-v1.pt` (6.21 MB), with metrics and hash in `ml/models/bulb-health-v1.json`. Large data and binary weights are ignored by Git; retain/copy the evaluated checkpoint when moving the project. `bulb-health-v1.torchscript.pt` is also available; this is not TFLite or an integrated mobile runtime.
+The active weights are `ml/models/bulb-health-all-v2.pt` (6.21 MB), with the checkpoint hash and training counts in `ml/models/bulb-health-all-v2.json`. This checkpoint uses all 16,271 unique usable images. There is no independent holdout for v2; the v1 evaluation below must not be presented as v2 accuracy. The v1 TorchScript file is not a v2 export or an integrated mobile runtime.
 
 ## Real-image flow
 
 1. Select **Trained bulb-health model**, upload a clear photo or use **Camera**.
 2. For one bulb, confirm it is a single-bulb image. For several bulbs, choose **Outline onion**, click around each visible bulb, and **Finish outline** for each. Outlines are user-provided evidence, not model-generated segmentation.
-3. For physical measurement, choose **Reference scale**, click both endpoints of a known-size reference in the same plane, and enter its length in millimetres. A valid onion outline is also required. Whole-image confirmation alone cannot measure a bulb.
+3. For physical measurement, print the 50 mm marker from **Download reference marker** and place it flat beside the onion. A camera capture requires a detected marker or a manually marked known reference. You can also choose **Reference scale**, click both endpoints of a known-size reference in the same plane, and enter its length in millimetres. A valid onion outline is required. Whole-image confirmation alone cannot measure a bulb.
 4. Sign in and analyze. Select a boundary to see health evidence, confidence, physical size where supported, uncertainty and the grading explanation.
 5. Generate a PDF or export JSON. History contains only saved v2 analyses; old v1 snapshots remain in the database but are hidden because their grading semantics differ.
 
@@ -54,11 +54,12 @@ The user supplied `Image Dataset of Red and White Onion Bulbs and Lea.zip`, cont
 .\.venv\Scripts\python.exe ml/datasets/validate_dataset.py
 .\.venv\Scripts\python.exe ml/training/train_health.py --epochs 12 --workers 2
 .\.venv\Scripts\python.exe ml/training/export_health.py
+.\.venv\Scripts\python.exe ml/training/train_all_health.py
 ```
 
 Preparation removes exact duplicates and conflicting hash labels, decodes every image, and preserves source labels. Multiple-bulb pictures are held out as an image-level stress test. There are no lot IDs: 100-consecutive-file groups provide an explicit proxy split, not proof of independent lots. Mild augmentation applies only to training.
 
-Actual run: 8,177 training, 1,726 validation, 2,137 test and 4,231 multiple-bulb stress images. Early stopping completed ten epochs and selected epoch six. Held-out accuracy **99.77%**, macro F1 **0.9970**; multiple-bulb image-level accuracy **86.79%**. Treat these as provisional dataset metrics, not deployment accuracy. See the full model card for confounders and unsupported claims.
+The first v1 run used 8,177 training, 1,726 validation, 2,137 test and 4,231 multiple-bulb stress images. Its provisional held-out accuracy was **99.77%**, macro F1 **0.9970**. A subsequent six-epoch v2 fine-tune used **all 16,271 unique usable images**, including the former validation, test and multi-bulb sets. No independent v2 accuracy estimate remains. See the full model card for confounders and unsupported claims.
 
 YOLO segmentation scaffolding remains in `ml/train.py`, `ml/evaluate.py`, `ml/export.py`, and `ml/dataset.yaml`. It is a separate workflow requiring proper instance annotations; it was not trained using invented masks from this ZIP. `ONION_SEG_WEIGHTS` can enable the optional real segmentation adapter after compatible onion weights and label semantics are validated.
 
