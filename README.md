@@ -30,6 +30,8 @@ $env:SMTP_APP_PASSWORD = [System.Net.NetworkCredential]::new('', $smtpSecret).Pa
 
 The local API uses SQLite for this local prototype unless PostgreSQL is configured. Set `DATABASE_URL` to a PostgreSQL URL (for example `postgresql+psycopg://oniongrade:password@127.0.0.1:5432/oniongrade`) or set `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` before running the launcher to use PostgreSQL. It applies Alembic migrations and copies previous SQLite records once after verifying their hashes. Protect `data/` like any local credential and evidence store.
 
+For this Windows local workspace, the launcher also reads an existing `data/smtp-app-password.txt` when `SMTP_APP_PASSWORD` is not set. This Git-ignored file should contain only the app password. Replace it and restart the API when rotating the credential; use a private environment variable on a hosted backend.
+
 ## Fresh installation
 
 Use Python 3.12 and Node 22+:
@@ -47,10 +49,10 @@ The active weights are `ml/models/bulb-health-all-v2.pt` (6.21 MB), with the che
 
 ## Real-image flow
 
-1. Select **Trained bulb-health model**, upload a clear photo or use **Camera**.
-2. For one bulb, confirm it is a single-bulb image. For several bulbs, choose **Outline onion**, click around each visible bulb, and **Finish outline** for each. Outlines are user-provided evidence, not model-generated segmentation.
-3. For physical measurement, print the 50 mm marker from **Download reference marker** and place it flat beside the onion. A camera capture requires a detected marker or a manually marked known reference. You can also choose **Reference scale**, click both endpoints of a known-size reference in the same plane, and enter its length in millimetres. A valid onion outline is required. Whole-image confirmation alone cannot measure a bulb.
-4. Sign in and analyze. Select a boundary to see health evidence, confidence, physical size where supported, uncertainty and the grading explanation.
+1. Select **Trained onion health model**, upload a clear, close photo, or use **Camera**. **Whole photo · no drawing** is the default and ignores unfinished drawing marks.
+2. For separate results per bulb, choose **Individual onions · optional**, then **Outline onion**, click around each visible bulb, and **Finish outline** for each. These are user-provided regions, not automatic model detections. A photo containing mixed healthy and unhealthy bulbs receives one combined image-level prediction, so photograph a single onion for the clearest quick result.
+3. Physical measurement is optional. Use a printed 50 mm marker or **Reference scale** with two endpoints of a known-size reference in the same plane, and enter its length in millimetres. A valid onion outline is also required to measure a bulb. Whole-photo screening needs neither an outline nor a reference.
+4. Sign in and analyze. New health analyses receive an **AI visual grade** of Good, Poor, or Review required, saved in the result and PDF. Leaf-only and uncertain predictions remain visible as review results. These app-defined visual grades do not establish Grade A or URS eligibility.
 5. Generate a PDF or export JSON. History contains only saved v2 analyses; old v1 snapshots remain in the database but are hidden because their grading semantics differ.
 
 The health model cannot certify Grade A or calculate the weighted defect quality score. Its healthy prediction does not prove the absence of a specific defect. Unhealthy stays unspecified rather than being relabeled as rot. In demo mode mock findings exercise these rules but are not evidence about the uploaded image.
@@ -76,8 +78,8 @@ YOLO segmentation scaffolding remains in `ml/train.py`, `ml/evaluate.py`, `ml/ex
 ## API
 
 - `POST /api/auth/register`, `/api/auth/verify-otp`, `/api/auth/resend-otp`, `/api/auth/login`; `GET /api/auth/me`
-- `POST /api/analyze`: multipart `image`, `mode`, optional `regions` polygons, `calibration_reference_mm`, `calibration_points`, `variety`; health mode requires regions or `single_onion_confirmed=true`.
-- `POST /api/analyze/batch`: 1–10 independent images; real health mode requires confirmation of one bulb per image. No repeated-onion cross-image deduplication is claimed.
+- `POST /api/analyze`: multipart `image`, `mode`, optional `regions` polygons, `calibration_reference_mm`, `calibration_points`, `variety`; health mode runs on the whole image when regions are omitted.
+- `POST /api/analyze/batch`: 1–10 independent whole-image health screens. No repeated-onion cross-image deduplication is claimed.
 - `GET /api/inspection/{id}`, `/image`, `/annotated`
 - `GET /api/inspections`
 - `POST /api/report/{id}`, `GET /api/report/{id}/pdf`

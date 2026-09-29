@@ -1,0 +1,3 @@
+# Install alongside requirements-health.txt to export and check browser-model assets.
+onnx==1.23.1
+onnxruntime==1.30.0

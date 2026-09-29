@@ -72,7 +72,36 @@ def test_auth_and_mime(client):
 def test_batch_partial_failure_and_duplicate(client):
     r=client.post('/api/analyze/batch',headers=auth(client),files=[('images',('a.jpg',sample(),'image/jpeg')),('images',('b.jpg',sample(),'image/jpeg')),('images',('c.jpg',b'bad','image/jpeg'))],data={'mode':'demo'})
     assert [x['success'] for x in r.json()['results']]==[True,False,False]
-def test_health_requires_confirmation(client): assert analyze(client,mode='health').status_code==422
+@pytest.mark.parametrize('health_label,confidence,expected_grade',[
+    ('HEALTHY_BULB',.98,'Good'),('UNHEALTHY_BULB',.98,'Poor'),
+    ('LEAF_ONLY',.98,'Review required'),('HEALTHY_BULB',.5,'Review required'),
+    ('UNHEALTHY_BULB',.5,'Review required')])
+def test_whole_photo_returns_health_result_including_leaf_prediction(client,monkeypatch,health_label,confidence,expected_grade):
+    import backend.inference as inference
+    probabilities={label: confidence if label==health_label else (1-confidence)/2 for label in ['HEALTHY_BULB','UNHEALTHY_BULB','LEAF_ONLY']}
+    monkeypatch.setattr(inference,'health_predict',lambda image:(health_label,confidence,probabilities))
+    response=analyze(client,mode='health')
+    assert response.status_code==200,response.text
+    record=response.json()
+    assert record['analysis_scope']=='whole_image'
+    assert record['detections'][0]['health_label']==health_label
+    assert record['grade_a_percentage'] is None
+    assert record['detections'][0]['mask'] is None
+    if health_label=='LEAF_ONLY':
+        assert record['review_required']
+        assert record['detections'][0]['class']=='REVIEW_REQUIRED'
+        assert record['detections'][0]['classification_warnings']
+    saved=client.get('/api/inspection/'+record['id'],headers=auth(client))
+    assert saved.status_code==200
+    assert saved.json()['detections'][0]['health_probabilities']==probabilities
+    assert saved.json()['visual_grade']['label']==expected_grade
+    assert saved.json()['detections'][0]['visual_grade']['label']==expected_grade
+    headers=auth(client)
+    assert client.post('/api/report/'+record['id'],headers=headers).status_code==200
+    pdf=client.get('/api/report/'+record['id']+'/pdf',headers=headers)
+    text='\n'.join(page.extract_text() for page in PdfReader(BytesIO(pdf.content)).pages)
+    assert 'AI visual grade: '+expected_grade in text
+    assert client.get('/api/reports/verify/'+record['report_hash']).json()['valid']
 def test_owner_protection(client):
     r=analyze(client).json()
     import backend.main as main

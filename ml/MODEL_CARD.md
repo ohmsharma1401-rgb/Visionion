@@ -14,7 +14,7 @@ Reproduce v2 after preparing the dataset and creating v1 using `python ml/traini
 
 ## Scope and architecture
 
-TorchVision MobileNetV3 Small with an ImageNet1K-pretrained backbone and a three-class head: HEALTHY_BULB, UNHEALTHY_BULB, LEAF_ONLY. Input is RGB, aspect-preserving padded to 256 then resized to 160, normalized using ImageNet mean/std. Per-onion operation requires a user-confirmed single bulb or separately drawn bulb regions. Region cropping is not learned segmentation and has not been independently benchmarked.
+TorchVision MobileNetV3 Small with an ImageNet1K-pretrained backbone and a three-class head: HEALTHY_BULB, UNHEALTHY_BULB, LEAF_ONLY. Input is RGB, aspect-preserving padded to 256 then resized to 160, normalized using ImageNet mean/std. The default app flow classifies the full uploaded photo without drawing. Optional per-onion operation uses separately drawn bulb regions; region cropping is not learned segmentation and has not been independently benchmarked.
 
 Healthy is broad visible-health evidence. Unhealthy is **not** automatically rotten, damaged, sprouted, mold or any other subtype. Leaf-only is a rejection category, not a general out-of-distribution detector. Other objects can still receive confident wrong predictions. The model cannot establish Grade A, URS, physical size, exact weight, internal quality or food safety.
 

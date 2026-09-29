@@ -10,6 +10,9 @@ root=Path(__file__).resolve().parents[1]
 os.chdir(root)
 sys.path.insert(0,str(root))
 Path('data').mkdir(exist_ok=True)
+mail_secret = Path('data/smtp-app-password.txt')
+if not os.getenv('SMTP_APP_PASSWORD') and mail_secret.is_file():
+    os.environ['SMTP_APP_PASSWORD'] = mail_secret.read_text(encoding='utf-8').strip()
 for variable,filename in [('JWT_SECRET','local-jwt-secret.txt')]:
     path=Path('data',filename)
     if not path.exists(): path.write_text(secrets.token_urlsafe(32))

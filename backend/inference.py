@@ -20,7 +20,7 @@ def model_info():
     metadata=json.loads(METADATA_PATH.read_text()) if trained else None
     return {'demo_enabled':os.getenv('DEMO_MODE','true').lower()=='true','health_model_available':trained,'health_model':metadata,'segmentation_available':bool(os.getenv('ONION_SEG_WEIGHTS')),
             'supported_real_labels':['HEALTHY_BULB','UNHEALTHY_BULB','LEAF_ONLY'] if trained else [],
-            'limitations':LIMITATIONS+['The supplied dataset contains image-level health labels, no per-onion masks or defect subtype labels. Use user-drawn regions for individual bulb classification. Automatic per-onion outlines in demo mode are mock geometry.']}
+            'limitations':LIMITATIONS+['The supplied dataset contains image-level health labels, no per-onion masks or defect subtype labels. Whole-image screening classifies the photo as a whole; it does not locate or count separate bulbs. User-drawn regions remain optional for individual bulb classification.']}
 
 @lru_cache(maxsize=1)
 def health_model():
@@ -82,15 +82,16 @@ def infer(image,mode,scenario='multiple',regions=None):
         output=[]
         threshold=json.loads(METADATA_PATH.read_text())['confidence_threshold'] if METADATA_PATH.exists() else .8
         for i,polygon in enumerate(polygons):
-            d=detection(i+1,polygon,'REVIEW_REQUIRED',0,source='user_outline' if supplied else 'user_confirmed_single_image')
+            d=detection(i+1,polygon,'REVIEW_REQUIRED',0,source='user_outline' if supplied else 'whole_image_health_screen')
             box=d['bbox'];crop=image.crop(tuple(map(int,box)))
             label,confidence,probabilities=health_predict(crop)
-            if label=='LEAF_ONLY' and confidence>=threshold: continue
             d.update(health_label=label,confidence=confidence,health_probabilities=probabilities)
+            if label=='LEAF_ONLY':
+                d['classification_warnings']=['The model classified this photo as leaf-only and cannot assess bulb health. This may be a misclassification; it does not prove that onions are absent. Try a close-up of one intact bulb.']
             d['class']='GOOD' if label=='HEALTHY_BULB' and confidence>=threshold else 'REVIEW_REQUIRED'
             d['eligibility_blocked']='This model predicts broad bulb health only. Specific defect checks needed for Grade A were not trained; manual review is required.'
             if label=='UNHEALTHY_BULB': d['defects']=[{'type':'UNSPECIFIED_VISIBLE_UNHEALTHY','confidence':confidence}]
-            if confidence<threshold: d['classification_warnings']=[f'Health confidence is below the validation-selected {threshold:.2f} review threshold.']
+            if confidence<threshold: d.setdefault('classification_warnings',[]).append(f'Health confidence is below the validation-selected {threshold:.2f} review threshold.')
             if not supplied: d['mask']=None
             output.append(d)
         return output,json.loads(METADATA_PATH.read_text())['model_version']

@@ -1,0 +1,56 @@
+{
+  "model_version": "bulb-health-all-v2",
+  "labels": [
+    "HEALTHY_BULB",
+    "UNHEALTHY_BULB",
+    "LEAF_ONLY"
+  ],
+  "source_sha256": "1fd4ea7f18c0a41625dd52dbaae16107f37c89483422a62c4b86c945c222bb4d",
+  "onnx_sha256": "4f5f41fcdcf4a8ff5fcb55422e77ec7a1b5f08413810aafeed656f64f7390f1b",
+  "bytes": 6094386,
+  "opset": 17,
+  "input": {
+    "name": "image",
+    "shape": [
+      1,
+      3,
+      160,
+      160
+    ],
+    "dtype": "float32",
+    "color": "RGB",
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "preprocessing": "EXIF orient; aspect-preserving pad to 256x256 with RGB 127; resize to 160x160; divide by 255; normalize; NCHW"
+  },
+  "output": {
+    "name": "probabilities",
+    "shape": [
+      1,
+      3
+    ]
+  },
+  "confidence_threshold": 0.65,
+  "conversion_check": {
+    "cases": 10,
+    "max_absolute_error": 7.510185241699219e-06,
+    "scope": "PyTorch versus native ONNX Runtime, not browser or accuracy validation"
+  },
+  "limitations": [
+    "No true lot/session identifiers; consecutive filename proxy groups do not establish lot independence.",
+    "Single-bulb labels support broad health only, not defect subtypes or Grade A.",
+    "No bounding boxes or masks in supplied dataset. Multiple stress results are image-level only.",
+    "Leaf class is not a general non-onion detector. Unseen objects can be misclassified.",
+    "Softmax confidence is not a calibrated probability of correctness.",
+    "Multi-bulb images were used with image-level health labels; this does not train per-onion detection or segmentation.",
+    "A new independent lot-level test is required to estimate deployment accuracy."
+  ]
+}

@@ -29,6 +29,7 @@ def validate_image(content:bytes,mime:str,limits:dict):
 
 def check_visibility(detections,width,height,limits):
     for d in detections:
+        if d.get('region_source') == 'whole_image_health_screen': continue
         if d['region_source']=='user_confirmed_single_image': continue
         x1,y1,x2,y2=d['bbox']
         if x1<=1 or y1<=1 or x2>=width-1 or y2>=height-1: d['visibility_issues'].append('Onion partially outside frame or touching the image edge.')
@@ -45,6 +46,7 @@ def check_visibility(detections,width,height,limits):
 def annotated_image(image,detections,calibration,demo=False):
     out=image.copy();draw=ImageDraw.Draw(out)
     for d in detections:
+        if d.get('region_source') == 'whole_image_health_screen': continue
         color=COLORS[d['class']];box=d['bbox']
         if d.get('mask'): draw.line([tuple(p) for p in d['mask']]+[tuple(d['mask'][0])],fill=color,width=max(2,image.width//300))
         else: draw.rectangle(box,outline=color,width=3)

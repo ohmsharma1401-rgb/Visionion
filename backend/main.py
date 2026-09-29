@@ -102,7 +102,7 @@ def me(owner:str=Depends(actor)):
         return {'id':user.id,'email':user.email,'name':user.name}
 
 @app.get('/api/health')
-def health(): return {'status':'ok','version':'0.2.0','trained_health_model':model_info()['health_model_available']}
+def health(): return {'status':'ok','version':'0.2.0','trained_health_model':model_info()['health_model_available'],'email_delivery_configured':bool(os.getenv('SMTP_APP_PASSWORD'))}
 @app.get('/api/model/info')
 def info(): return model_info()
 @app.get('/api/grading-spec')
@@ -172,10 +172,15 @@ def process(content,mime,owner,mode,scenario,variety,reference_mm,points,regions
             d['measurement']=None
         d['size_category']=size_category(d['diameter_mm'])
     result=analyze_onions(detections,SPEC,URS)
+    if mode=='health':
+        from backend.grading.visual_grade import grade_health
+        threshold=max(SPEC.review_confidence,model_info()['health_model']['confidence_threshold'])
+        result['visual_grade']=grade_health(result['detections'],threshold)
     identifier=identifier or str(uuid.uuid4())
-    record={'id':identifier,'schema_version':2,'success':True,'created_at':datetime.now(timezone.utc).isoformat(),'inspector':owner,'variety':variety,'batch_details':batch_details or {},'mode':mode,'demo':mode=='demo','model_version':model_version,'grading_spec':SPEC.spec_version,'spec_snapshot':SPEC.model_dump(),'urs_snapshot':URS.model_dump(),'size_config_snapshot':size_config(),'image_quality':quality,'calibration':calibration,'width':image.width,'height':image.height,
+    image_level=mode=='health' and regions is None
+    record={'id':identifier,'schema_version':2,'success':True,'created_at':datetime.now(timezone.utc).isoformat(),'inspector':owner,'variety':variety,'batch_details':batch_details or {},'mode':mode,'analysis_scope':'whole_image' if image_level else 'per_onion','demo':mode=='demo','model_version':model_version,'grading_spec':SPEC.spec_version,'spec_snapshot':SPEC.model_dump(),'urs_snapshot':URS.model_dump(),'size_config_snapshot':size_config(),'image_quality':quality,'calibration':calibration,'width':image.width,'height':image.height,
             'image_url':f'/api/inspection/{identifier}/image','annotated_url':f'/api/inspection/{identifier}/annotated','summary':{k:v for k,v in result.items() if k!='detections'},**result,
-            'limitations':LIMITATIONS+(['DEMO ANALYSIS: boundaries, classes and confidence are fixed mock predictions unrelated to uploaded image contents. Calibrated mock geometry is still not a real measurement.'] if mode=='demo' else ['The health model was trained on broad image-level labels. It cannot identify rot/damage/sprouting subtypes or certify Grade A. User outlines are not learned segmentation.'] if mode=='health' else [])}
+            'limitations':LIMITATIONS+(['DEMO ANALYSIS: boundaries, classes and confidence are fixed mock predictions unrelated to uploaded image contents. Calibrated mock geometry is still not a real measurement.'] if mode=='demo' else ['This result classifies the uploaded photo as a whole; it does not find or count separate onions. The supplied labels support broad healthy, unhealthy, or leaf-only classes, not specific defect types, Grade A, or URS. A mixed or crowded photo may combine healthy and unhealthy bulbs into one image-level result.'] if image_level else ['The health model was trained on broad image-level labels. It cannot identify rot/damage/sprouting subtypes or certify Grade A. User outlines are not learned segmentation.'] if mode=='health' else [])}
     # Persist only re-encoded JPEGs; ignore uploaded filenames and strip EXIF metadata.
     record['model_sha256']=model_info()['health_model']['sha256'] if mode=='health' else None
     with write_lock:
@@ -192,7 +197,6 @@ def parse_json(value,name):
 
 @app.post('/api/analyze',response_model=AnalysisResponse)
 def analyze(image:UploadFile=File(...),mode:str=Form('health',pattern='^(health|demo|segmentation)$'),demo_scenario:str=Form('multiple',pattern='^(single|multiple|uncertain|no_onion|calibrated_sample)$'),calibration_reference_mm:float|None=Form(None,gt=0,le=1000),calibration_points:str|None=Form(None),regions:str|None=Form(None),variety:str=Form('Unspecified',max_length=100),batch_details:str|None=Form(None),inspection_id:uuid.UUID|None=Form(None),single_onion_confirmed:bool=Form(False),require_reference:bool=Form(False),owner=Depends(actor)):
-    if mode=='health' and not regions and not single_onion_confirmed: raise HTTPException(422,'Confirm this is a single bulb or provide an outline for each onion.')
     if inspection_id:
         with Session() as db:
             if db.get(Inspection,str(inspection_id)): raise HTTPException(409,'Inspection ID already exists; original evidence cannot be overwritten.')
@@ -206,7 +210,6 @@ def analyze(image:UploadFile=File(...),mode:str=Form('health',pattern='^(health|
 @app.post('/api/analyze/batch')
 def batch(images:list[UploadFile]=File(...),mode:str=Form('health',pattern='^(health|demo|segmentation)$'),single_onion_confirmed:bool=Form(False),owner=Depends(actor)):
     if not 1<=len(images)<=10: raise HTTPException(422,'Batch size must be 1–10 images.')
-    if mode=='health' and not single_onion_confirmed: raise HTTPException(422,'Confirm every batch image contains a single bulb.')
     results=[];hashes=set()
     for index,image in enumerate(images):
         content=image.file.read(8*1024*1024+1);sha=hashlib.sha256(content).hexdigest()
@@ -216,7 +219,7 @@ def batch(images:list[UploadFile]=File(...),mode:str=Form('health',pattern='^(he
             if len(content)>8*1024*1024: raise HTTPException(413,'Maximum image size is 8 MB.')
             results.append({'index':index,'success':True,'inspection':process(content,image.content_type,owner,mode,'multiple','Unspecified',None,None,None)})
         except HTTPException as exc: results.append({'index':index,'success':False,'error':exc.detail})
-    return {'results':results,'policy':'Independent images. No cross-image counting or de-duplication of the same onion in different views.'}
+    return {'results':results,'policy':'Each photo receives a whole-image health screen unless per-onion regions are explicitly supplied. No cross-image counting or de-duplication of the same onion in different views.'}
 
 @app.get('/api/inspections')
 def history(owner=Depends(actor)):
