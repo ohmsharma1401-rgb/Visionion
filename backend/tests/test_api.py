@@ -78,7 +78,7 @@ def test_owner_protection(client):
     import backend.main as main
     import jwt
     stranger={'Authorization':'Bearer '+jwt.encode({'sub':'other'},main.SECRET,algorithm='HS256')}
-    assert client.get('/api/inspection/'+r['id'],headers=stranger).status_code==404
+    assert client.get('/api/inspection/'+r['id'],headers=stranger).status_code==401
 def test_rate_limit(client,monkeypatch):
     headers=auth(client);monkeypatch.setenv('RATE_LIMIT_PER_MINUTE','1');assert analyze(client,headers).status_code==429
 

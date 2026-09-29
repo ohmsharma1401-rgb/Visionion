@@ -20,7 +20,15 @@ In another terminal:
 npm.cmd run dev
 ```
 
-Open `http://127.0.0.1:5173`. Username: **inspector**. The generated password is in ignored `data/local-demo-password.txt`. The local API binds only to 127.0.0.1 and uses SQLite for this local prototype unless PostgreSQL is configured. Set `DATABASE_URL` to a PostgreSQL URL (for example `postgresql+psycopg://oniongrade:password@127.0.0.1:5432/oniongrade`) or set `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` before running the launcher to use PostgreSQL. It applies Alembic migrations and copies previous SQLite records once after verifying their hashes. Protect `data/` like any local credential and evidence store.
+Open `http://127.0.0.1:5173`. The home page is public. To create an account, enter a name, email address and password, verify the six-digit code sent to **that email inbox**, then sign in. This is email delivery, not SMS; you can read the message in Gmail on your phone. Before starting the API, set `SMTP_APP_PASSWORD` privately in its environment for the `amrishs256@gmail.com` sender. The value must be a new 16-character [Google app password](https://support.google.com/accounts/answer/185833); a Google backup code or ordinary account password will not work. Do not put it in `web/`, commit it, or post it in chat. In PowerShell, set it in the same terminal used to start the API:
+
+```powershell
+$smtpSecret = Read-Host 'New Gmail app password' -AsSecureString
+$env:SMTP_APP_PASSWORD = [System.Net.NetworkCredential]::new('', $smtpSecret).Password
+.\.venv\Scripts\python.exe scripts/run_local.py
+```
+
+The local API uses SQLite for this local prototype unless PostgreSQL is configured. Set `DATABASE_URL` to a PostgreSQL URL (for example `postgresql+psycopg://oniongrade:password@127.0.0.1:5432/oniongrade`) or set `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` before running the launcher to use PostgreSQL. It applies Alembic migrations and copies previous SQLite records once after verifying their hashes. Protect `data/` like any local credential and evidence store.
 
 ## Fresh installation
 
@@ -67,7 +75,7 @@ YOLO segmentation scaffolding remains in `ml/train.py`, `ml/evaluate.py`, `ml/ex
 
 ## API
 
-- `POST /api/auth/login`
+- `POST /api/auth/register`, `/api/auth/verify-otp`, `/api/auth/resend-otp`, `/api/auth/login`; `GET /api/auth/me`
 - `POST /api/analyze`: multipart `image`, `mode`, optional `regions` polygons, `calibration_reference_mm`, `calibration_points`, `variety`; health mode requires regions or `single_onion_confirmed=true`.
 - `POST /api/analyze/batch`: 1–10 independent images; real health mode requires confirmation of one bulb per image. No repeated-onion cross-image deduplication is claimed.
 - `GET /api/inspection/{id}`, `/image`, `/annotated`

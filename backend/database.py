@@ -28,6 +28,23 @@ class ReportArtifact(Base):
     inspection_id: Mapped[str] = mapped_column(String(36),primary_key=True)
     pdf_sha256: Mapped[str] = mapped_column(String(64))
 
+class User(Base):
+    __tablename__ = 'users'
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    password_hash: Mapped[str] = mapped_column(String(255))
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class EmailOtp(Base):
+    __tablename__ = 'email_otps'
+    user_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    code_hash: Mapped[str] = mapped_column(String(64))
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    sent_at: Mapped[datetime] = mapped_column(DateTime)
+    attempts: Mapped[int] = mapped_column(default=0)
+
 def database_url() -> URL:
     """Use PostgreSQL in deployment; allow explicit SQLite for local development/tests."""
     supplied = os.getenv('DATABASE_URL')

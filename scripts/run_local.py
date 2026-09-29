@@ -1,4 +1,4 @@
-"""Start a local-only demo with generated credentials kept in ignored data/."""
+"""Start the local API with a persistent JWT secret kept in ignored data/."""
 import os
 from pathlib import Path
 import secrets
@@ -10,7 +10,7 @@ root=Path(__file__).resolve().parents[1]
 os.chdir(root)
 sys.path.insert(0,str(root))
 Path('data').mkdir(exist_ok=True)
-for variable,filename in [('DEMO_PASSWORD','local-demo-password.txt'),('JWT_SECRET','local-jwt-secret.txt')]:
+for variable,filename in [('JWT_SECRET','local-jwt-secret.txt')]:
     path=Path('data',filename)
     if not path.exists(): path.write_text(secrets.token_urlsafe(32))
     os.environ.setdefault(variable,path.read_text().strip())

@@ -16,7 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from pydantic import BaseModel,Field
 from sqlalchemy import select
-from backend.database import initialize,Inspection,Audit,ReportArtifact
+from backend.database import initialize,Inspection,Audit,ReportArtifact,User
+from backend import auth as accounts
 from backend.grading import analyze_onions,load_spec,load_urs
 from backend.grading.validators import calibration_scale,diameter_from_polygon
 from backend.calibration import detect_reference,marker_pdf,size_category,size_config
@@ -54,12 +55,13 @@ async def limits(request:Request,call_next):
 def canonical(value): return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False)
 def digest(value): return hashlib.sha256(canonical(value).encode()).hexdigest()
 def actor(credentials:HTTPAuthorizationCredentials=Depends(security)):
-    try: return jwt.decode(credentials.credentials,SECRET,algorithms=['HS256'])['sub']
+    try: subject=jwt.decode(credentials.credentials,SECRET,algorithms=['HS256'])['sub']
     except (jwt.PyJWTError,KeyError): raise HTTPException(401,'Session expired or invalid.')
-
-class Login(BaseModel):
-    username:str=Field(min_length=1,max_length=80)
-    password:str=Field(min_length=1,max_length=200)
+    if subject=='inspector' and os.getenv('ALLOW_SQLITE_FOR_TESTS')=='1': return subject
+    with Session() as db:
+        user=db.get(User,subject)
+        if not user or not user.verified_at: raise HTTPException(401,'Session expired or invalid.')
+    return subject
 
 class BatchDetails(BaseModel):
     batch_id:str=Field(default='',max_length=80)
@@ -70,10 +72,34 @@ class BatchDetails(BaseModel):
     notes:str=Field(default='',max_length=1000)
 
 @app.post('/api/auth/login')
-def login(body:Login):
-    if not PASSWORD: raise HTTPException(503,'Set DEMO_PASSWORD on the server.')
-    if body.username!='inspector' or not secrets.compare_digest(body.password,PASSWORD): raise HTTPException(401,'Invalid credentials.')
-    return {'access_token':jwt.encode({'sub':'inspector','exp':datetime.now(timezone.utc)+timedelta(hours=8)},SECRET,algorithm='HS256'),'token_type':'bearer'}
+def login(body:accounts.Login):
+    if body.username=='inspector' and not body.email and os.getenv('ALLOW_SQLITE_FOR_TESTS')=='1' and PASSWORD and secrets.compare_digest(body.password,PASSWORD):
+        subject='inspector'
+    else:
+        if not body.email: raise HTTPException(401,'Invalid email or password.')
+        email=accounts.normalized_email(body.email)
+        with Session() as db:
+            user=db.scalar(select(User).where(User.email==email))
+            if not user or not accounts.valid_password(body.password,user.password_hash): raise HTTPException(401,'Invalid email or password.')
+            if not user.verified_at: raise HTTPException(403,'Verify your email before signing in.')
+            subject=user.id
+    return {'access_token':jwt.encode({'sub':subject,'exp':datetime.now(timezone.utc)+timedelta(hours=8)},SECRET,algorithm='HS256'),'token_type':'bearer'}
+
+@app.post('/api/auth/register')
+def register(body:accounts.Register): return accounts.register(Session,body,SECRET)
+
+@app.post('/api/auth/verify-otp')
+def verify_otp(body:accounts.Verify): return accounts.verify(Session,body,SECRET)
+
+@app.post('/api/auth/resend-otp')
+def resend_otp(body:accounts.Resend): return accounts.resend(Session,body,SECRET)
+
+@app.get('/api/auth/me')
+def me(owner:str=Depends(actor)):
+    with Session() as db:
+        user=db.get(User,owner)
+        if not user or not user.verified_at: raise HTTPException(401,'Account unavailable.')
+        return {'id':user.id,'email':user.email,'name':user.name}
 
 @app.get('/api/health')
 def health(): return {'status':'ok','version':'0.2.0','trained_health_model':model_info()['health_model_available']}
