@@ -1,5 +1,6 @@
 import importlib
 import hashlib
+import json
 from io import BytesIO
 from pathlib import Path
 import numpy as np
@@ -51,6 +52,16 @@ def test_uncertain(client):
     r=analyze(client,demo_scenario='uncertain').json();assert r['review_count']==6 and r['grade_a_percentage'] is None
 def test_no_scale_no_diameter(client):
     r=analyze(client,demo_scenario='single').json();assert r['detections'][0]['diameter_mm'] is None and r['grade_a_percentage'] is None
+def test_batch_details_are_saved_and_reported(client):
+    details={'batch_id':'LOT-42','farm':'Nashik Test Farm','operator':'Inspector','origin':'Nashik','expected_kg':120,'notes':'Dry storage'}
+    response=analyze(client,batch_details=json.dumps(details));assert response.status_code==200,response.text
+    record=response.json();assert record['batch_details']==details
+    saved=client.get('/api/inspection/'+record['id'],headers=auth(client)).json();assert saved['batch_details']==details
+    headers=auth(client);client.post('/api/report/'+record['id'],headers=headers)
+    pdf=client.get('/api/report/'+record['id']+'/pdf',headers=headers)
+    text='\n'.join(page.extract_text() for page in PdfReader(BytesIO(pdf.content)).pages)
+    assert 'LOT-42' in text and 'Nashik Test Farm' in text
+    assert analyze(client,batch_details=json.dumps({'farm':'x'*121})).status_code==422
 def test_bad_calibration(client):
     assert analyze(client,calibration_reference_mm='50').status_code==422
     assert analyze(client,calibration_points='bad-json').status_code==422

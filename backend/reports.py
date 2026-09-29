@@ -8,16 +8,20 @@ from reportlab.lib.utils import ImageReader
 from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle,Image,PageBreak,KeepTogether
 
 def render_pdf(record:dict,verify_url:str,data_dir:Path)->bytes:
-    output=BytesIO();styles=getSampleStyleSheet();styles['Title'].textColor=colors.HexColor('#214e3d')
+    output=BytesIO();styles=getSampleStyleSheet();styles['Title'].textColor=colors.HexColor('#7d2747')
     styles['BodyText'].fontSize=9;styles['BodyText'].leading=12
     P=lambda text:Paragraph(escape(str(text).replace('−','-').replace('–','-')),styles['BodyText'])
     def table(rows,widths):
         t=Table([[P(c) for c in row] for row in rows],colWidths=widths,repeatRows=1)
-        t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#e2ecd9')),('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.HexColor('#f5f7f1'),colors.white]),('VALIGN',(0,0),(-1,-1),'TOP'),('TOPPADDING',(0,0),(-1,-1),6),('BOTTOMPADDING',(0,0),(-1,-1),6)]));return t
+        t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#f0dfd1')),('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.HexColor('#fbf6ef'),colors.white]),('VALIGN',(0,0),(-1,-1),'TOP'),('TOPPADDING',(0,0),(-1,-1),6),('BOTTOMPADDING',(0,0),(-1,-1),6)]));return t
     fmt=lambda x,s='': 'Unavailable' if x is None else f'{x:g}{s}'
-    story=[Paragraph('OnionGrade AI',styles['Title']),Paragraph('DEMO ANALYSIS - MOCK PREDICTIONS' if record['demo'] else 'VISIBLE BULB HEALTH ANALYSIS',styles['Heading2'])]
+    story=[Paragraph('Visionion',styles['Title']),Paragraph('DEMO ANALYSIS - MOCK PREDICTIONS' if record['demo'] else 'ONION QUALITY EVIDENCE REPORT - MANUAL REVIEW REQUIRED',styles['Heading2'])]
     for key in ('id','created_at','inspector','variety','model_version','grading_spec'):
         story.extend([P(f'{key.replace("_"," ").title()}: {record[key]}'),Spacer(1,4)])
+    details=record.get('batch_details') or {}
+    for key in ('batch_id','farm','operator','origin','expected_kg','notes'):
+        if details.get(key) not in (None,''):
+            story.extend([P(f'{key.replace("_"," ").title()}: {details[key]}'),Spacer(1,4)])
     story.extend([Spacer(1,10),table([['Measure','Result'],['Detected / marked regions',record['total_onions']],['Grade A (resolved subset)',fmt(record['grade_a_percentage'],'%')],['Pending review',record['review_count']],['URS',fmt(record['urs_percentage'],'%')],['AI Visual Quality Score (unofficial)',fmt(record['quality_score'],' / 100')],['Mean model confidence',fmt(record['confidence_statistics']['mean'])],['Diameter avg / min / max (mm)',' / '.join(fmt(record[k]) for k in ('average_diameter','min_diameter','max_diameter'))]], [240,270]),Spacer(1,10),P(record['denominator_policy']),Spacer(1,6),P(record['urs_message']),Spacer(1,6),P(record['score_explanation']['formula']),P('Score weights: '+str(record['score_explanation']['weights'])),P('Weighted deductions: '+str(record['score_explanation']['deductions'])),Spacer(1,8),P('Calibration: '+record['calibration']['message'])])
     if record['calibration']['available']: story.append(P(f"Measurement method: {record['calibration']['method']}; reference {record['calibration']['reference_mm']} mm; scale {record['calibration']['mm_per_pixel']:.6f} mm/pixel; marker or line points {record['calibration']['points']}"))
     story.extend([Spacer(1,12),Paragraph('Limitations',styles['Heading3'])]+[P(x) for x in record['limitations']])
@@ -35,6 +39,6 @@ def render_pdf(record:dict,verify_url:str,data_dir:Path)->bytes:
     qr=BytesIO();qrcode.make(verify_url).save(qr,format='PNG');qr.seek(0)
     story.extend([Spacer(1,12),Paragraph('Verification',styles['Heading2']),Image(qr,width=75,height=75),P('SHA-256 of canonical analysis record (not a digital signature):'),P(record['report_hash']),P('The separate PDF byte hash is supplied by the report endpoint and public verification API. Scan the QR to compare. Grading rules are illustrative, not legally authoritative.')])
     def footer(canvas,doc):
-        canvas.setFont('Helvetica',8);canvas.setFillColor(colors.grey);canvas.drawString(42,22,'OnionGrade AI | '+('DEMO ANALYSIS' if record['demo'] else 'Broad health model; manual grading review required'));canvas.drawRightString(552,22,str(doc.page))
+        canvas.setFont('Helvetica',8);canvas.setFillColor(colors.HexColor('#7d2747'));canvas.drawString(42,22,'Visionion | '+('DEMO ANALYSIS' if record['demo'] else 'Broad health model; manual grading review required'));canvas.drawRightString(552,22,str(doc.page))
     SimpleDocTemplate(output,pagesize=(595,842),leftMargin=42,rightMargin=42,topMargin=32,bottomMargin=38).build(story,onFirstPage=footer,onLaterPages=footer)
     return output.getvalue()

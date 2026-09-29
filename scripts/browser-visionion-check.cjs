@@ -1,0 +1,37 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const {readFileSync,mkdirSync}=require('fs');
+
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:'msedge'});
+ const page=await browser.newPage({viewport:{width:1440,height:900}});
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ mkdirSync('tmp/visionion-ui',{recursive:true});
+ await page.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'});
+ await page.screenshot({path:'tmp/visionion-ui/home.png',fullPage:true});
+ await page.getByRole('button',{name:'New inspection'}).first().click();
+ await page.getByText('Start with the batch.').waitFor();
+ await page.screenshot({path:'tmp/visionion-ui/setup.png',fullPage:true});
+ await page.locator('.header-account').click();
+ await page.getByText('Welcome back').waitFor();
+ await page.screenshot({path:'tmp/visionion-ui/login.png',fullPage:true});
+ await page.getByLabel('PASSWORD').fill(readFileSync('data/local-demo-password.txt','utf8').trim());
+ await page.getByRole('button',{name:'Sign in to Visionion'}).click();
+ await page.getByRole('button',{name:'Sign out'}).waitFor();
+ await page.locator('.bottom-nav button').filter({hasText:'History'}).click();
+ await page.screenshot({path:'tmp/visionion-ui/history.png',fullPage:true});
+ await page.locator('.bottom-nav button').filter({hasText:'Reports'}).click();
+ await page.screenshot({path:'tmp/visionion-ui/reports.png',fullPage:true});
+ await page.locator('.bottom-nav button').filter({hasText:'Onions'}).click();
+ await page.screenshot({path:'tmp/visionion-ui/onions.png',fullPage:true});
+ const mobile=await browser.newPage({viewport:{width:390,height:844}});
+ mobile.on('pageerror',error=>errors.push(error.message));
+ await mobile.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'});
+ await mobile.screenshot({path:'tmp/visionion-ui/mobile-home.png',fullPage:true});
+ const overflow=await mobile.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ if(overflow>1)throw Error(`Mobile horizontal overflow: ${overflow}px`);
+ await mobile.locator('.bottom-nav button').filter({hasText:'Inspect'}).click();
+ await mobile.screenshot({path:'tmp/visionion-ui/mobile-setup.png',fullPage:true});
+ if(errors.length)throw Error(errors.join('\n'));
+ console.log('PASS: home, setup, login, history, reports, onions, mobile layout');
+ await browser.close();
+})().catch(error=>{console.error(error);process.exit(1)});

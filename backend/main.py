@@ -61,6 +61,14 @@ class Login(BaseModel):
     username:str=Field(min_length=1,max_length=80)
     password:str=Field(min_length=1,max_length=200)
 
+class BatchDetails(BaseModel):
+    batch_id:str=Field(default='',max_length=80)
+    farm:str=Field(default='',max_length=120)
+    operator:str=Field(default='',max_length=120)
+    origin:str=Field(default='',max_length=120)
+    expected_kg:float|None=Field(default=None,ge=0,le=10000000)
+    notes:str=Field(default='',max_length=1000)
+
 @app.post('/api/auth/login')
 def login(body:Login):
     if not PASSWORD: raise HTTPException(503,'Set DEMO_PASSWORD on the server.')
@@ -99,7 +107,7 @@ def save_record(record,owner):
         db.add(Audit(payload=payload,prev_hash=prev,hash=hashlib.sha256((prev+payload).encode()).hexdigest()))
     return record
 
-def process(content,mime,owner,mode,scenario,variety,reference_mm,points,regions,identifier=None,require_reference=False):
+def process(content,mime,owner,mode,scenario,variety,reference_mm,points,regions,identifier=None,require_reference=False,batch_details=None):
     try:
         image,quality=validate_image(content,mime,SPEC.quality)
         if points is not None or reference_mm is not None:
@@ -139,7 +147,7 @@ def process(content,mime,owner,mode,scenario,variety,reference_mm,points,regions
         d['size_category']=size_category(d['diameter_mm'])
     result=analyze_onions(detections,SPEC,URS)
     identifier=identifier or str(uuid.uuid4())
-    record={'id':identifier,'schema_version':2,'success':True,'created_at':datetime.now(timezone.utc).isoformat(),'inspector':owner,'variety':variety,'mode':mode,'demo':mode=='demo','model_version':model_version,'grading_spec':SPEC.spec_version,'spec_snapshot':SPEC.model_dump(),'urs_snapshot':URS.model_dump(),'size_config_snapshot':size_config(),'image_quality':quality,'calibration':calibration,'width':image.width,'height':image.height,
+    record={'id':identifier,'schema_version':2,'success':True,'created_at':datetime.now(timezone.utc).isoformat(),'inspector':owner,'variety':variety,'batch_details':batch_details or {},'mode':mode,'demo':mode=='demo','model_version':model_version,'grading_spec':SPEC.spec_version,'spec_snapshot':SPEC.model_dump(),'urs_snapshot':URS.model_dump(),'size_config_snapshot':size_config(),'image_quality':quality,'calibration':calibration,'width':image.width,'height':image.height,
             'image_url':f'/api/inspection/{identifier}/image','annotated_url':f'/api/inspection/{identifier}/annotated','summary':{k:v for k,v in result.items() if k!='detections'},**result,
             'limitations':LIMITATIONS+(['DEMO ANALYSIS: boundaries, classes and confidence are fixed mock predictions unrelated to uploaded image contents. Calibrated mock geometry is still not a real measurement.'] if mode=='demo' else ['The health model was trained on broad image-level labels. It cannot identify rot/damage/sprouting subtypes or certify Grade A. User outlines are not learned segmentation.'] if mode=='health' else [])}
     # Persist only re-encoded JPEGs; ignore uploaded filenames and strip EXIF metadata.
@@ -157,14 +165,17 @@ def parse_json(value,name):
     except (ValueError,TypeError): raise HTTPException(422,f'{name} must be valid JSON.')
 
 @app.post('/api/analyze',response_model=AnalysisResponse)
-def analyze(image:UploadFile=File(...),mode:str=Form('health',pattern='^(health|demo|segmentation)$'),demo_scenario:str=Form('multiple',pattern='^(single|multiple|uncertain|no_onion|calibrated_sample)$'),calibration_reference_mm:float|None=Form(None,gt=0,le=1000),calibration_points:str|None=Form(None),regions:str|None=Form(None),variety:str=Form('Unspecified',max_length=100),inspection_id:uuid.UUID|None=Form(None),single_onion_confirmed:bool=Form(False),require_reference:bool=Form(False),owner=Depends(actor)):
+def analyze(image:UploadFile=File(...),mode:str=Form('health',pattern='^(health|demo|segmentation)$'),demo_scenario:str=Form('multiple',pattern='^(single|multiple|uncertain|no_onion|calibrated_sample)$'),calibration_reference_mm:float|None=Form(None,gt=0,le=1000),calibration_points:str|None=Form(None),regions:str|None=Form(None),variety:str=Form('Unspecified',max_length=100),batch_details:str|None=Form(None),inspection_id:uuid.UUID|None=Form(None),single_onion_confirmed:bool=Form(False),require_reference:bool=Form(False),owner=Depends(actor)):
     if mode=='health' and not regions and not single_onion_confirmed: raise HTTPException(422,'Confirm this is a single bulb or provide an outline for each onion.')
     if inspection_id:
         with Session() as db:
             if db.get(Inspection,str(inspection_id)): raise HTTPException(409,'Inspection ID already exists; original evidence cannot be overwritten.')
     content=image.file.read(8*1024*1024+1)
     if len(content)>8*1024*1024: raise HTTPException(413,'Maximum image size is 8 MB.')
-    return process(content,image.content_type,owner,mode,demo_scenario,variety,calibration_reference_mm,parse_json(calibration_points,'calibration_points'),parse_json(regions,'regions'),str(inspection_id) if inspection_id else None,require_reference)
+    raw_batch=parse_json(batch_details,'batch_details')
+    try: validated_batch=BatchDetails.model_validate(raw_batch).model_dump() if raw_batch is not None else None
+    except ValueError as exc: raise HTTPException(422,'Invalid batch details.') from exc
+    return process(content,image.content_type,owner,mode,demo_scenario,variety,calibration_reference_mm,parse_json(calibration_points,'calibration_points'),parse_json(regions,'regions'),str(inspection_id) if inspection_id else None,require_reference,validated_batch)
 
 @app.post('/api/analyze/batch')
 def batch(images:list[UploadFile]=File(...),mode:str=Form('health',pattern='^(health|demo|segmentation)$'),single_onion_confirmed:bool=Form(False),owner=Depends(actor)):

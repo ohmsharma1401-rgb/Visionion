@@ -1,0 +1,33 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const {readFileSync}=require('fs');
+
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:'msedge'});
+ const page=await browser.newPage({viewport:{width:1280,height:900}});
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'});
+ await page.locator('.header-account').click();
+ await page.getByLabel('PASSWORD').fill(readFileSync('data/local-demo-password.txt','utf8').trim());
+ await page.getByRole('button',{name:'Sign in to Visionion'}).click();
+ await page.getByRole('button',{name:'Sign out'}).waitFor();
+ await page.locator('.bottom-nav button').filter({hasText:'Inspect'}).click();
+ const batchId=`UI-QA-${Date.now()}`;
+ await page.getByLabel('Batch ID').fill(batchId);
+ await page.getByLabel('Farm / facility').fill('UI QA Farm');
+ await page.getByLabel('Origin').fill('Nashik');
+ await page.getByRole('button',{name:'File upload'}).click();
+ await page.getByRole('button',{name:'Continue to image capture'}).click();
+ await page.getByRole('button',{name:'Try calibrated sample'}).click();
+ await page.getByText('synthetic-calibrated-sample.jpg').first().waitFor();
+ await page.getByRole('button',{name:'Analyze image'}).click();
+ await page.getByText('Every onion, explained.').waitFor({timeout:30000});
+ await page.locator('.bottom-nav button').filter({hasText:'History'}).click();
+ await page.locator('.history-table').getByText(batchId).first().waitFor();
+ await page.getByText('UI QA Farm').first().waitFor();
+ await page.locator('.bottom-nav button').filter({hasText:'Reports'}).click();
+ await page.locator('.report-cover').getByText(batchId).first().waitFor();
+ await page.getByText('UI QA Farm').first().waitFor();
+ if(errors.length)throw Error(errors.join('\n'));
+ console.log('PASS: batch details saved through UI and visible in history/report');
+ await browser.close();
+})().catch(error=>{console.error(error);process.exit(1)});
