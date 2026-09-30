@@ -16,12 +16,12 @@ services:
         fromService:
           type: web
           name: visionion-web
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
       - key: PUBLIC_BASE_URL
         fromService:
           type: web
           name: visionion-api
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
       - key: DATA_DIR
         value: /tmp/visionion-cache
       - key: DEMO_LOGIN_ENABLED
@@ -48,4 +48,4 @@ services:
         fromService:
           type: web
           name: visionion-api
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
