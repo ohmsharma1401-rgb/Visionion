@@ -27,8 +27,9 @@ services:
       - key: MKL_NUM_THREADS
         value: "1"
 
-  - type: static
+  - type: web
     name: visionion-web
+    runtime: static
     plan: free
     rootDir: web
     buildCommand: npm install && npm run build
