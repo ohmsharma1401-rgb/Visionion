@@ -14,13 +14,13 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         fromService:
-          type: web
           name: visionion-web
+          type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: PUBLIC_BASE_URL
         fromService:
-          type: web
           name: visionion-api
+          type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: DATA_DIR
         value: /tmp/visionion-cache
@@ -46,6 +46,6 @@ services:
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
-          type: web
           name: visionion-api
+          type: web
           envVarKey: RENDER_EXTERNAL_URL
