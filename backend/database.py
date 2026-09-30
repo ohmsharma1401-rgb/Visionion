@@ -50,6 +50,10 @@ def database_url() -> URL:
     supplied = os.getenv('DATABASE_URL')
     if supplied:
         url = make_url(supplied)
+        # Managed providers commonly supply postgres:// or postgresql:// URLs.
+        # This application installs psycopg 3, not the default psycopg2 driver.
+        if url.drivername in ('postgres', 'postgresql'):
+            url = url.set(drivername='postgresql+psycopg')
     else:
         required = ('POSTGRES_HOST', 'POSTGRES_PORT', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_DB')
         missing = [name for name in required if not os.getenv(name)]

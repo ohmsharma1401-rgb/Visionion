@@ -54,9 +54,15 @@ async def limits(request:Request,call_next):
 
 def canonical(value): return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False)
 def digest(value): return hashlib.sha256(canonical(value).encode()).hexdigest()
+def demo_login_enabled(): return os.getenv('DEMO_LOGIN_ENABLED','true').lower()=='true'
 def actor(credentials:HTTPAuthorizationCredentials=Depends(security)):
-    try: subject=jwt.decode(credentials.credentials,SECRET,algorithms=['HS256'])['sub']
+    try:
+        claims=jwt.decode(credentials.credentials,SECRET,algorithms=['HS256'],options={'require':['sub','exp']})
+        subject=claims['sub']
     except (jwt.PyJWTError,KeyError): raise HTTPException(401,'Session expired or invalid.')
+    if subject.startswith('demo:'):
+        if claims.get('demo') is True and demo_login_enabled(): return subject
+        raise HTTPException(401,'Demo session expired or unavailable.')
     if subject=='inspector' and os.getenv('ALLOW_SQLITE_FOR_TESTS')=='1': return subject
     with Session() as db:
         user=db.get(User,subject)
@@ -85,6 +91,13 @@ def login(body:accounts.Login):
             subject=user.id
     return {'access_token':jwt.encode({'sub':subject,'exp':datetime.now(timezone.utc)+timedelta(hours=8)},SECRET,algorithm='HS256'),'token_type':'bearer'}
 
+@app.post('/api/auth/demo')
+def demo_login():
+    if not demo_login_enabled(): raise HTTPException(403,'Demo sign-in is currently unavailable.')
+    now=datetime.now(timezone.utc)
+    token=jwt.encode({'sub':'demo:'+str(uuid.uuid4()),'demo':True,'iat':now,'exp':now+timedelta(hours=1)},SECRET,algorithm='HS256')
+    return {'access_token':token,'token_type':'bearer','expires_in':3600}
+
 @app.post('/api/auth/register')
 def register(body:accounts.Register): return accounts.register(Session,body,SECRET)
 
@@ -96,6 +109,7 @@ def resend_otp(body:accounts.Resend): return accounts.resend(Session,body,SECRET
 
 @app.get('/api/auth/me')
 def me(owner:str=Depends(actor)):
+    if owner.startswith('demo:'): return {'id':owner,'email':None,'name':'Demo visitor','demo':True}
     with Session() as db:
         user=db.get(User,owner)
         if not user or not user.verified_at: raise HTTPException(401,'Account unavailable.')

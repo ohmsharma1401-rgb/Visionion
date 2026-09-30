@@ -16,6 +16,8 @@ def render_pdf(record:dict,verify_url:str,data_dir:Path)->bytes:
         t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#f0dfd1')),('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.HexColor('#fbf6ef'),colors.white]),('VALIGN',(0,0),(-1,-1),'TOP'),('TOPPADDING',(0,0),(-1,-1),6),('BOTTOMPADDING',(0,0),(-1,-1),6)]));return t
     fmt=lambda x,s='': 'Unavailable' if x is None else f'{x:g}{s}'
     story=[Paragraph('Visionion',styles['Title']),Paragraph('DEMO ANALYSIS - MOCK PREDICTIONS' if record['demo'] else 'ONION QUALITY EVIDENCE REPORT',styles['Heading2'])]
+    if record.get('model_version') == 'bulb-health-all-v2':
+        story.extend([P('Training base: 16,271 usable images. No independent holdout evaluation exists for this checkpoint; no validated accuracy figure is claimed. Model confidence is not accuracy.'), P('Good, Poor and Review required are visual health assessments, not official procurement grades. Grade A and URS require an applicable official specification and sufficient observations. Whole-photo predictions do not establish individual onion counts or lot-level percentages.'), Spacer(1,8)])
     visual_grade=record.get('visual_grade')
     if visual_grade:
         story.extend([Paragraph('AI visual grade: '+escape(visual_grade['label']),styles['Heading2']),P(visual_grade['reason']),P('Based on visible appearance. Policy: '+visual_grade['policy']),Spacer(1,8)])

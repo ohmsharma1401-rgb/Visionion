@@ -1,7 +1,12 @@
 const base=(import.meta.env.VITE_API_BASE_URL||'').replace(/\/$/,'');
+export const API_UNAVAILABLE='The server is temporarily unreachable. Please wait a moment and try again. Your form has been kept.';
 export const apiUrl=(path:string)=>`${base}/api${path}`;
 export async function api(path:string,options:RequestInit={}){
- const response=await fetch(apiUrl(path),{...options,headers:{'Bypass-Tunnel-Reminder':'true',...(options.body instanceof FormData?{}:{'Content-Type':'application/json'}),...(sessionStorage.getItem('token')?{Authorization:`Bearer ${sessionStorage.getItem('token')}`} : {}),...options.headers}});
+ let response:Response;
+ try{
+  response=await fetch(apiUrl(path),{...options,signal:options.signal??AbortSignal.timeout(45000),headers:{'Bypass-Tunnel-Reminder':'true',...(options.body instanceof FormData?{}:{'Content-Type':'application/json'}),...(sessionStorage.getItem('token')?{Authorization:`Bearer ${sessionStorage.getItem('token')}`} : {}),...options.headers}});
+ }catch{throw Error(API_UNAVAILABLE);}
+ if(response.headers.get('Content-Type')?.includes('text/html'))throw Error(API_UNAVAILABLE);
  if(!response.ok){let detail;try{detail=(await response.json()).detail;}catch{detail='The server is unavailable.';}if(response.status===401)sessionStorage.removeItem('token');throw Error(typeof detail==='string'?detail:detail?.reasons?.join(' ')||JSON.stringify(detail));}
  return response;
 }

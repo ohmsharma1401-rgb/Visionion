@@ -101,6 +101,12 @@ def test_whole_photo_returns_health_result_including_leaf_prediction(client,monk
     pdf=client.get('/api/report/'+record['id']+'/pdf',headers=headers)
     text='\n'.join(page.extract_text() for page in PdfReader(BytesIO(pdf.content)).pages)
     assert 'AI visual grade: '+expected_grade in text
+    assert record['urs_percentage'] is None
+    assert record['detections'][0]['grade_a_candidate'] is None
+    if record['model_version']=='bulb-health-all-v2':
+        assert '16,271 usable images' in text
+        assert 'no validated accuracy figure is claimed' in ' '.join(text.split())
+        assert 'not official procurement grades' in ' '.join(text.split())
     assert client.get('/api/reports/verify/'+record['report_hash']).json()['valid']
 def test_owner_protection(client):
     r=analyze(client).json()
@@ -119,3 +125,36 @@ def test_pdf_tamper_is_detected(client):
     verified=client.get('/api/reports/verify/'+record['report_hash']).json()
     assert verified['record_valid'] and not verified['pdf_valid'] and not verified['valid']
     assert client.get('/api/report/'+record['id']+'/pdf',headers=headers).status_code==409
+
+def test_demo_sessions_are_isolated_and_expire(client,monkeypatch):
+    import jwt
+    import backend.main as main
+    from datetime import datetime,timedelta,timezone
+    monkeypatch.setenv('DEMO_LOGIN_ENABLED','true')
+    first=client.post('/api/auth/demo').json()['access_token']
+    second=client.post('/api/auth/demo').json()['access_token']
+    a={'Authorization':'Bearer '+first};b={'Authorization':'Bearer '+second}
+    assert first!=second
+    assert client.get('/api/auth/me',headers=a).json()['demo'] is True
+    response=analyze(client,a)
+    assert response.status_code==200,response.text
+    record=response.json();identifier=record['id']
+    assert len(client.get('/api/inspections',headers=a).json())==1
+    assert client.get('/api/inspections',headers=b).json()==[]
+    for headers in (b,auth(client)):
+        assert client.get('/api/inspection/'+identifier,headers=headers).status_code==404
+        assert client.get(record['image_url'],headers=headers).status_code==404
+        assert client.post('/api/report/'+identifier,headers=headers).status_code==404
+    assert client.post('/api/report/'+identifier,headers=a).status_code==200
+    assert client.get('/api/report/'+identifier+'/pdf',headers=a).status_code==200
+    assert client.get('/api/report/'+identifier+'/pdf',headers=b).status_code==404
+    claims=jwt.decode(first,main.SECRET,algorithms=['HS256'])
+    claims['exp']=datetime.now(timezone.utc)-timedelta(seconds=1)
+    expired=jwt.encode(claims,main.SECRET,algorithm='HS256')
+    assert client.get('/api/auth/me',headers={'Authorization':'Bearer '+expired}).status_code==401
+    claims['exp']=datetime.now(timezone.utc)+timedelta(hours=1);claims.pop('demo')
+    invalid=jwt.encode(claims,main.SECRET,algorithm='HS256')
+    assert client.get('/api/auth/me',headers={'Authorization':'Bearer '+invalid}).status_code==401
+    monkeypatch.setenv('DEMO_LOGIN_ENABLED','false')
+    assert client.post('/api/auth/demo').status_code==403
+    assert client.get('/api/auth/me',headers=a).status_code==401

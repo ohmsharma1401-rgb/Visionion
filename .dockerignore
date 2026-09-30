@@ -11,3 +11,9 @@ output
 data
 __pycache__
 .env
+tmp
+.codex
+.agents
+**/.env
+**/.env.*
+**/.vercel
