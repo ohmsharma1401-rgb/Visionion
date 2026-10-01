@@ -25,6 +25,7 @@ from backend.inference import infer,model_info,LIMITATIONS
 from backend.vision import validate_image,check_visibility,annotated_image
 from backend.schemas import AnalysisResponse
 from backend.reports import render_pdf
+from backend.email_delivery import email_delivery_configured
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=Path(os.getenv('DATA_DIR',str(ROOT/'data')));DATA.mkdir(parents=True,exist_ok=True)
@@ -116,7 +117,7 @@ def me(owner:str=Depends(actor)):
         return {'id':user.id,'email':user.email,'name':user.name}
 
 @app.get('/api/health')
-def health(): return {'status':'ok','version':'0.2.0','trained_health_model':model_info()['health_model_available'],'email_delivery_configured':bool(os.getenv('SMTP_APP_PASSWORD'))}
+def health(): return {'status':'ok','version':'0.2.0','trained_health_model':model_info()['health_model_available'],'email_delivery_configured':email_delivery_configured()}
 @app.get('/api/model/info')
 def info(): return model_info()
 @app.get('/api/grading-spec')

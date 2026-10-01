@@ -1,13 +1,10 @@
 """Email verification and password authentication for public accounts."""
 from datetime import datetime, timedelta, timezone
-from email.message import EmailMessage
 import hashlib
 import hmac
 import os
 import re
 import secrets
-import smtplib
-import ssl
 import uuid
 
 from fastapi import HTTPException
@@ -16,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from backend.database import User, EmailOtp
+from backend.email_delivery import send_code
 
 EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
@@ -58,29 +56,6 @@ def valid_password(password: str, stored: str) -> bool:
 
 def hash_code(code: str, user_id: str, secret: str) -> str:
     return hmac.new(secret.encode(), f'{user_id}:{code}'.encode(), hashlib.sha256).hexdigest()
-
-def send_code(email: str, code: str) -> None:
-    username = os.getenv('SMTP_USERNAME', 'amrishs256@gmail.com')
-    password = (os.getenv('SMTP_APP_PASSWORD') or '').replace(' ', '')
-    if not password:
-        raise HTTPException(503, 'Email codes are not available yet. Configure a Gmail app password on the API server and restart it.')
-    host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
-    if host == 'smtp.gmail.com' and len(password) != 16:
-        raise HTTPException(503, 'The configured Gmail app password is not 16 characters. Create a new app password for the sender account.')
-    message = EmailMessage()
-    message['From'] = os.getenv('SMTP_FROM', username)
-    message['To'] = email
-    message['Subject'] = 'Your Visionion verification code'
-    message.set_content(f'Your Visionion verification code is {code}. It expires in 10 minutes. If you did not request an account, ignore this message.')
-    try:
-        with smtplib.SMTP(host, int(os.getenv('SMTP_PORT', '587')), timeout=12) as client:
-            client.starttls(context=ssl.create_default_context())
-            client.login(username, password)
-            client.send_message(message)
-    except smtplib.SMTPAuthenticationError as exc:
-        raise HTTPException(503, 'The sender account rejected the Gmail app password. Check the SMTP account settings and try again.') from exc
-    except (OSError, smtplib.SMTPException) as exc:
-        raise HTTPException(503, 'Verification email could not be sent. Please try again later.') from exc
 
 def issue_code(db, user: User, secret: str) -> None:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
