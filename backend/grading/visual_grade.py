@@ -14,9 +14,9 @@ def grade_health(detections, threshold):
                 grade, reason = 'Good', 'Healthy appearance predicted, but confidence does not exceed the custom 90% grade A threshold.'
         else:
             grade, reason = 'Poor', 'The model predicts an unhealthy appearance in the assessed image.'
-        detection['visual_grade'] = {'label': grade, 'reason': reason, 'policy': 'custom-visual-health-v2-above-90', 'confidence_threshold': threshold}
+        detection['visual_grade'] = {'label': grade, 'quality_label': 'Good' if grade == 'A' else grade, 'reason': reason, 'policy': 'custom-visual-health-v2-above-90', 'confidence_threshold': threshold}
     if len(detections) == 1:
         return dict(detections[0]['visual_grade'])
     grades = [d['visual_grade']['label'] for d in detections]
     grade = 'Review required' if not grades or 'Review required' in grades else 'Poor' if 'Poor' in grades else 'A' if all(g == 'A' for g in grades) else 'Good'
-    return {'label': grade, 'reason': 'Custom unofficial visual grades in selected regions: '+', '.join(f'{name}: {grades.count(name)}' for name in ('A', 'Good', 'Poor', 'Review required'))+'. A requires healthy-bulb confidence above 90%; not official Grade A eligibility.', 'policy': 'custom-visual-health-v2-above-90', 'confidence_threshold': threshold}
+    return {'label': grade, 'quality_label': 'Good' if grade == 'A' else grade, 'reason': 'Custom unofficial visual grades in selected regions: '+', '.join(f'{name}: {grades.count(name)}' for name in ('A', 'Good', 'Poor', 'Review required'))+'. A requires healthy-bulb confidence above 90%; not official Grade A eligibility.', 'policy': 'custom-visual-health-v2-above-90', 'confidence_threshold': threshold}

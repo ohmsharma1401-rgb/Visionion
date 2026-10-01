@@ -10,9 +10,11 @@ tmp/
 *.zip
 ml/datasets/raw/
 ml/datasets/prepared/
+ml/datasets/prepared-v3/
 ml/models/*.pt
 !ml/models/bulb-health-v1.pt
 !ml/models/bulb-health-all-v2.pt
+!ml/models/bulb-health-v3.pt
 !ml/models/bulb-health-v1.torchscript.pt
 ml/models/*.onnx
 ml/cache/

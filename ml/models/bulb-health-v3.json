@@ -1,0 +1,185 @@
+{
+  "model_version": "bulb-health-v3",
+  "architecture": "mobilenet_v3_small",
+  "pretrained_backbone": "ImageNet1K",
+  "best_epoch": 10,
+  "device": "cuda",
+  "elapsed_seconds": 926.7,
+  "confidence_threshold": 0.65,
+  "validation": {
+    "accuracy": 0.9734,
+    "macro_f1": 0.9711,
+    "per_class": {
+      "HEALTHY_BULB": {
+        "precision": 0.9751,
+        "recall": 0.977,
+        "f1": 0.9761,
+        "support": 2003
+      },
+      "UNHEALTHY_BULB": {
+        "precision": 0.9379,
+        "recall": 0.9625,
+        "f1": 0.95,
+        "support": 800
+      },
+      "LEAF_ONLY": {
+        "precision": 1.0,
+        "recall": 0.975,
+        "f1": 0.9873,
+        "support": 1000
+      }
+    },
+    "confusion_matrix": [
+      [
+        1957,
+        46,
+        0
+      ],
+      [
+        30,
+        770,
+        0
+      ],
+      [
+        20,
+        5,
+        975
+      ]
+    ],
+    "labels": [
+      "HEALTHY_BULB",
+      "UNHEALTHY_BULB",
+      "LEAF_ONLY"
+    ]
+  },
+  "test": {
+    "accuracy": 0.9811,
+    "macro_f1": 0.9782,
+    "per_class": {
+      "HEALTHY_BULB": {
+        "precision": 0.9747,
+        "recall": 0.9957,
+        "f1": 0.9851,
+        "support": 1855
+      },
+      "UNHEALTHY_BULB": {
+        "precision": 0.9728,
+        "recall": 0.94,
+        "f1": 0.9561,
+        "support": 800
+      },
+      "LEAF_ONLY": {
+        "precision": 1.0,
+        "recall": 0.987,
+        "f1": 0.9935,
+        "support": 1000
+      }
+    },
+    "confusion_matrix": [
+      [
+        1847,
+        8,
+        0
+      ],
+      [
+        48,
+        752,
+        0
+      ],
+      [
+        0,
+        13,
+        987
+      ]
+    ],
+    "labels": [
+      "HEALTHY_BULB",
+      "UNHEALTHY_BULB",
+      "LEAF_ONLY"
+    ],
+    "threshold_coverage": 0.9937,
+    "accepted_accuracy": 0.9846
+  },
+  "multiple_stress": {
+    "accuracy": 0.9969,
+    "macro_f1": 0.9964,
+    "per_class": {
+      "HEALTHY_BULB": {
+        "precision": 0.9977,
+        "recall": 0.9977,
+        "f1": 0.9977,
+        "support": 886
+      },
+      "UNHEALTHY_BULB": {
+        "precision": 0.995,
+        "recall": 0.995,
+        "f1": 0.995,
+        "support": 400
+      },
+      "LEAF_ONLY": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      }
+    },
+    "confusion_matrix": [
+      [
+        884,
+        2,
+        0
+      ],
+      [
+        2,
+        398,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "labels": [
+      "HEALTHY_BULB",
+      "UNHEALTHY_BULB",
+      "LEAF_ONLY"
+    ],
+    "threshold_coverage": 0.9992,
+    "accepted_accuracy": 0.9977
+  },
+  "training_images": 16542,
+  "holdout_policy": "Fresh ImageNet initialization; source-hash and filename-proxy-group disjoint. Real lots and near-duplicate independence not established.",
+  "limitations": [
+    "No true lot/session identifiers; consecutive filename proxy groups do not establish lot independence.",
+    "Single-bulb labels support broad health only, not defect subtypes or Grade A.",
+    "No bounding boxes or masks in supplied dataset. Multiple stress results are image-level only.",
+    "Leaf class is not a general non-onion detector. Unseen objects can be misclassified.",
+    "Softmax confidence is not a calibrated probability of correctness."
+  ],
+  "sha256": "49d102129e2c61f7b936d411b6e1c613e686dafb0a59bf6b0c0e3e95af639246",
+  "evaluation_status": "internal_proxy_group_holdout_not_confirmed_independent_lots",
+  "dataset": {
+    "retained": 24000,
+    "duplicates_removed": 0,
+    "conflicts_removed": 0,
+    "corrupt": [],
+    "counts": {
+      "train/HEALTHY_BULB": 8509,
+      "val/HEALTHY_BULB": 2003,
+      "test/HEALTHY_BULB": 1855,
+      "train/UNHEALTHY_BULB": 3861,
+      "val/UNHEALTHY_BULB": 800,
+      "test/UNHEALTHY_BULB": 800,
+      "train/LEAF_ONLY": 4172,
+      "val/LEAF_ONLY": 1000,
+      "test/LEAF_ONLY": 1000
+    },
+    "group_counts": {
+      "train": 6042,
+      "val": 1403,
+      "test": 1286
+    },
+    "split_policy": "Seed 42; 70/15/15 approximate folder-stratified consecutive-100 filename proxy groups. Exact source duplicates removed. No real lot IDs; lot independence and near-duplicate independence unproven. Fresh ImageNet initialization required; do not warm-start v2."
+  }
+}

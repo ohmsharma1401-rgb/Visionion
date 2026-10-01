@@ -6,6 +6,7 @@ web/dist
 *.zip
 ml/datasets/raw
 ml/datasets/prepared
+ml/datasets/prepared-v3
 ml/cache
 output
 data

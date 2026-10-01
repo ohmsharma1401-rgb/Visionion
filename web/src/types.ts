@@ -1,4 +1,4 @@
-export type VisualGrade={label:'Good'|'Poor'|'Review required';reason:string;policy:string;confidence_threshold:number};
+export type VisualGrade={label:'A'|'Good'|'Poor'|'Review required';quality_label?:'Good'|'Poor'|'Review required';reason:string;policy:string;confidence_threshold:number};
 export type Point=[number,number];
 export type BatchDetails={batch_id:string;farm:string;operator:string;origin:string;expected_kg:number|null;notes:string};
 export type Detection={visual_grade?:VisualGrade;id:number;class:string;confidence:number;bbox:number[];mask:Point[]|null;centroid:Point;diameter_mm:number|null;size_category?:string|null;measurement?:null|{width_px:number;height_px:number;diameter_px:number|null;width_mm:number|null;height_mm:number|null;diameter_mm:number|null;calibration_source:string|null;reference_width_mm:number|null;confidence:number|null};defects:{type:string;confidence:number}[];grade_a_candidate:boolean|null;review_required:boolean;reasons:string[];region_source:string;health_label?:string;health_probabilities?:Record<string,number>;classification_warnings?:string[]};

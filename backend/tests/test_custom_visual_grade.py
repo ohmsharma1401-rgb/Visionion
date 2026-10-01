@@ -8,6 +8,7 @@ from backend.grading.visual_grade import grade_health
 def test_custom_threshold(label,confidence,expected):
     result=grade_health([{'health_label':label,'confidence':confidence}],.65)
     assert result['label']==expected
+    assert result['quality_label']==('Good' if expected=='A' else expected)
 
 def test_warnings_prevent_custom_a():
     assert grade_health([{'health_label':'HEALTHY_BULB','confidence':.99,

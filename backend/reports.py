@@ -20,6 +20,8 @@ def render_pdf(record:dict,verify_url:str,data_dir:Path)->bytes:
         story.extend([P('Training base: 16,271 usable images. No independent holdout evaluation exists for this checkpoint; no validated accuracy figure is claimed. Model confidence is not accuracy.'), P('Good, Poor and Review required are visual health assessments, not official procurement grades. Grade A and URS require an applicable official specification and sufficient observations. Whole-photo predictions do not establish individual onion counts or lot-level percentages.'), Spacer(1,8)])
     visual_grade=record.get('visual_grade')
     if visual_grade:
+        if visual_grade.get('quality_label'):
+            story.append(Paragraph('Visual quality: '+escape(visual_grade['quality_label']),styles['Heading2']))
         story.extend([Paragraph('AI visual grade: '+escape(visual_grade['label']),styles['Heading2']),P(visual_grade['reason']),P('Based on visible appearance. Policy: '+visual_grade['policy']),Spacer(1,8)])
     for key in ('id','created_at','inspector','variety','model_version','grading_spec'):
         story.extend([P(f'{key.replace("_"," ").title()}: {record[key]}'),Spacer(1,4)])

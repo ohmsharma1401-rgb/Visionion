@@ -1,0 +1,614 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 0.06694,
+    "validation": {
+      "accuracy": 0.9582,
+      "macro_f1": 0.9546,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9681,
+          "recall": 0.9541,
+          "f1": 0.961,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.8897,
+          "recall": 0.9375,
+          "f1": 0.913,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 0.997,
+          "recall": 0.983,
+          "f1": 0.9899,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1911,
+          92,
+          0
+        ],
+        [
+          47,
+          750,
+          3
+        ],
+        [
+          16,
+          1,
+          983
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 79.1
+  },
+  {
+    "epoch": 2,
+    "train_loss": 0.01122,
+    "validation": {
+      "accuracy": 0.9645,
+      "macro_f1": 0.9621,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9885,
+          "recall": 0.9451,
+          "f1": 0.9663,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.8747,
+          "recall": 0.9862,
+          "f1": 0.9271,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.986,
+          "f1": 0.993,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1893,
+          110,
+          0
+        ],
+        [
+          11,
+          789,
+          0
+        ],
+        [
+          11,
+          3,
+          986
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 156.8
+  },
+  {
+    "epoch": 3,
+    "train_loss": 0.00842,
+    "validation": {
+      "accuracy": 0.9711,
+      "macro_f1": 0.9686,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.962,
+          "recall": 0.9845,
+          "f1": 0.9731,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9588,
+          "recall": 0.9313,
+          "f1": 0.9448,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.976,
+          "f1": 0.9879,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1972,
+          31,
+          0
+        ],
+        [
+          55,
+          745,
+          0
+        ],
+        [
+          23,
+          1,
+          976
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 255.2
+  },
+  {
+    "epoch": 4,
+    "train_loss": 0.00546,
+    "validation": {
+      "accuracy": 0.9464,
+      "macro_f1": 0.944,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9808,
+          "recall": 0.9166,
+          "f1": 0.9476,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.8237,
+          "recall": 0.9812,
+          "f1": 0.8956,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.978,
+          "f1": 0.9889,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1836,
+          167,
+          0
+        ],
+        [
+          15,
+          785,
+          0
+        ],
+        [
+          21,
+          1,
+          978
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 341.2
+  },
+  {
+    "epoch": 5,
+    "train_loss": 0.00492,
+    "validation": {
+      "accuracy": 0.9679,
+      "macro_f1": 0.9649,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9573,
+          "recall": 0.984,
+          "f1": 0.9705,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9557,
+          "recall": 0.9175,
+          "f1": 0.9362,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.976,
+          "f1": 0.9879,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1971,
+          32,
+          0
+        ],
+        [
+          66,
+          734,
+          0
+        ],
+        [
+          22,
+          2,
+          976
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 413.6
+  },
+  {
+    "epoch": 6,
+    "train_loss": 0.0021,
+    "validation": {
+      "accuracy": 0.9713,
+      "macro_f1": 0.9688,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9656,
+          "recall": 0.982,
+          "f1": 0.9738,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9506,
+          "recall": 0.9387,
+          "f1": 0.9447,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.976,
+          "f1": 0.9879,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1967,
+          36,
+          0
+        ],
+        [
+          49,
+          751,
+          0
+        ],
+        [
+          21,
+          3,
+          976
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 480.3
+  },
+  {
+    "epoch": 7,
+    "train_loss": 0.00169,
+    "validation": {
+      "accuracy": 0.9727,
+      "macro_f1": 0.9702,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9671,
+          "recall": 0.982,
+          "f1": 0.9745,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.953,
+          "recall": 0.9375,
+          "f1": 0.9452,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.982,
+          "f1": 0.9909,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1967,
+          36,
+          0
+        ],
+        [
+          50,
+          750,
+          0
+        ],
+        [
+          17,
+          1,
+          982
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 560.3
+  },
+  {
+    "epoch": 8,
+    "train_loss": 0.00117,
+    "validation": {
+      "accuracy": 0.97,
+      "macro_f1": 0.9675,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9669,
+          "recall": 0.9775,
+          "f1": 0.9722,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9413,
+          "recall": 0.9413,
+          "f1": 0.9413,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.978,
+          "f1": 0.9889,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1958,
+          45,
+          0
+        ],
+        [
+          47,
+          753,
+          0
+        ],
+        [
+          20,
+          2,
+          978
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 633.3
+  },
+  {
+    "epoch": 9,
+    "train_loss": 0.00082,
+    "validation": {
+      "accuracy": 0.9648,
+      "macro_f1": 0.9622,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9751,
+          "recall": 0.9591,
+          "f1": 0.967,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9007,
+          "recall": 0.9637,
+          "f1": 0.9312,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.977,
+          "f1": 0.9884,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1921,
+          82,
+          0
+        ],
+        [
+          29,
+          771,
+          0
+        ],
+        [
+          20,
+          3,
+          977
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 701.1
+  },
+  {
+    "epoch": 10,
+    "train_loss": 0.0007,
+    "validation": {
+      "accuracy": 0.9734,
+      "macro_f1": 0.9711,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9751,
+          "recall": 0.977,
+          "f1": 0.9761,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9379,
+          "recall": 0.9625,
+          "f1": 0.95,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.975,
+          "f1": 0.9873,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1957,
+          46,
+          0
+        ],
+        [
+          30,
+          770,
+          0
+        ],
+        [
+          20,
+          5,
+          975
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 769.3
+  },
+  {
+    "epoch": 11,
+    "train_loss": 0.00063,
+    "validation": {
+      "accuracy": 0.9719,
+      "macro_f1": 0.9694,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.9727,
+          "recall": 0.9765,
+          "f1": 0.9746,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9364,
+          "recall": 0.9563,
+          "f1": 0.9462,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.975,
+          "f1": 0.9873,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1956,
+          47,
+          0
+        ],
+        [
+          35,
+          765,
+          0
+        ],
+        [
+          20,
+          5,
+          975
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 845.6
+  },
+  {
+    "epoch": 12,
+    "train_loss": 0.0005,
+    "validation": {
+      "accuracy": 0.9732,
+      "macro_f1": 0.9709,
+      "per_class": {
+        "HEALTHY_BULB": {
+          "precision": 0.976,
+          "recall": 0.9755,
+          "f1": 0.9758,
+          "support": 2003
+        },
+        "UNHEALTHY_BULB": {
+          "precision": 0.9346,
+          "recall": 0.965,
+          "f1": 0.9496,
+          "support": 800
+        },
+        "LEAF_ONLY": {
+          "precision": 1.0,
+          "recall": 0.975,
+          "f1": 0.9873,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": [
+        [
+          1954,
+          49,
+          0
+        ],
+        [
+          28,
+          772,
+          0
+        ],
+        [
+          20,
+          5,
+          975
+        ]
+      ],
+      "labels": [
+        "HEALTHY_BULB",
+        "UNHEALTHY_BULB",
+        "LEAF_ONLY"
+      ]
+    },
+    "elapsed_seconds": 920.3
+  }
+]

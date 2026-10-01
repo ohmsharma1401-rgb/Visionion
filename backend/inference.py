@@ -11,8 +11,10 @@ from backend.grading.validators import polygon_area
 ROOT=Path(__file__).resolve().parents[1]
 ALL_MODEL_PATH=ROOT/'ml/models/bulb-health-all-v2.pt'
 ALL_METADATA_PATH=ROOT/'ml/models/bulb-health-all-v2.json'
-MODEL_PATH=ALL_MODEL_PATH if ALL_MODEL_PATH.exists() and ALL_METADATA_PATH.exists() else ROOT/'ml/models/bulb-health-v1.pt'
-METADATA_PATH=ALL_METADATA_PATH if MODEL_PATH==ALL_MODEL_PATH else ROOT/'ml/models/bulb-health-v1.json'
+NEW_MODEL_PATH=ROOT/'ml/models/bulb-health-v3.pt'
+NEW_METADATA_PATH=ROOT/'ml/models/bulb-health-v3.json'
+MODEL_PATH=NEW_MODEL_PATH if NEW_MODEL_PATH.exists() and NEW_METADATA_PATH.exists() else ALL_MODEL_PATH if ALL_MODEL_PATH.exists() and ALL_METADATA_PATH.exists() else ROOT/'ml/models/bulb-health-v1.pt'
+METADATA_PATH=NEW_METADATA_PATH if MODEL_PATH==NEW_MODEL_PATH else ALL_METADATA_PATH if MODEL_PATH==ALL_MODEL_PATH else ROOT/'ml/models/bulb-health-v1.json'
 LIMITATIONS=['AI detects visible characteristics only. Internal rot, pesticide residue, moisture, firmness, smell, microbial infection and hidden defects cannot be reliably determined from these images.', 'Physical size needs a reference in the same plane; overlapping or partially hidden onions cannot be measured reliably.']
 
 def model_info():
