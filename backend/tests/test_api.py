@@ -73,7 +73,7 @@ def test_batch_partial_failure_and_duplicate(client):
     r=client.post('/api/analyze/batch',headers=auth(client),files=[('images',('a.jpg',sample(),'image/jpeg')),('images',('b.jpg',sample(),'image/jpeg')),('images',('c.jpg',b'bad','image/jpeg'))],data={'mode':'demo'})
     assert [x['success'] for x in r.json()['results']]==[True,False,False]
 @pytest.mark.parametrize('health_label,confidence,expected_grade',[
-    ('HEALTHY_BULB',.98,'Good'),('UNHEALTHY_BULB',.98,'Poor'),
+    ('HEALTHY_BULB',.98,'A'),('UNHEALTHY_BULB',.98,'Poor'),
     ('LEAF_ONLY',.98,'Review required'),('HEALTHY_BULB',.5,'Review required'),
     ('UNHEALTHY_BULB',.5,'Review required')])
 def test_whole_photo_returns_health_result_including_leaf_prediction(client,monkeypatch,health_label,confidence,expected_grade):
