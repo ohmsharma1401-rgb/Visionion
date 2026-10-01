@@ -2,6 +2,7 @@ import hashlib
 from io import BytesIO
 from PIL import Image, ImageOps, UnidentifiedImageError, ImageDraw
 import numpy as np
+import cv2
 
 ALLOWED_MIME={'image/jpeg':'JPEG','image/png':'PNG','image/webp':'WEBP'}
 COLORS={'GOOD':'#4b9661','DAMAGED':'#da933d','ROTTEN':'#c85555','SPROUTED':'#9877bf','UNDERSIZED':'#4e98b4','REVIEW_REQUIRED':'#d3a839'}
@@ -20,12 +21,20 @@ def validate_image(content:bytes,mime:str,limits:dict):
         raise ValueError('Unsupported or corrupt image.') from exc
     gray=np.asarray(image.convert('L'),dtype=np.float32)
     lap=gray[:-2,1:-1]+gray[2:,1:-1]+gray[1:-1,:-2]+gray[1:-1,2:]-4*gray[1:-1,1:-1]
-    blur=float(lap.var());brightness=float(gray.mean());glare=float((gray>245).mean());reasons=[]
+    # Border-connected white regions are background candidates, not evidence
+    # of glare on the onion. This heuristic does not detect onion boundaries.
+    bright=(gray>245).astype(np.uint8)
+    _,labels=cv2.connectedComponents(bright,connectivity=8)
+    border_labels=np.unique(np.concatenate((labels[0],labels[-1],labels[:,0],labels[:,-1])))
+    background=(bright!=0)&np.isin(labels,border_labels[border_labels!=0])
+    foreground=~background
+    glare=float(((bright!=0)&foreground).sum()/max(1,foreground.sum()))
+    blur=float(lap.var());brightness=float(gray.mean());reasons=[]
     if blur<limits['min_laplacian_variance']: reasons.append('Too blurry: hold the camera steady and refocus.')
     if brightness<limits['min_brightness']: reasons.append('Too dark: use diffuse daylight.')
     if brightness>limits['max_brightness']: reasons.append('Excessive brightness: reduce exposure.')
     if glare>limits['max_glare_fraction']: reasons.append('Excessive glare: avoid direct light.')
-    return image,{'usable':not reasons,'blur_score':round(blur,2),'brightness':round(brightness,2),'glare_fraction':round(glare,4),'width':image.width,'height':image.height,'reasons':reasons,'sha256':hashlib.sha256(content).hexdigest()}
+    return image,{'usable':not reasons,'blur_score':round(blur,2),'brightness':round(brightness,2),'glare_fraction':round(glare,4),'bright_background_fraction':round(float(background.mean()),4),'glare_method':'exclude_border_connected_white_background','width':image.width,'height':image.height,'reasons':reasons,'sha256':hashlib.sha256(content).hexdigest()}
 
 def check_visibility(detections,width,height,limits):
     for d in detections:
